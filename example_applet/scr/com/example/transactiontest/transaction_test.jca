@@ -1,0 +1,423 @@
+// converted by version 1.3
+// on Mon Jan 19 19:26:29 MSK 2026
+
+.package transaction_test {
+	.aid 0x1:0x2:0x3:0x4:0x5;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x1 1.3;		//javacard/framework
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+	}
+
+	.applet {
+		0x1:0x2:0x3:0x4:0x5:0x1 TransactionTest;
+	}
+
+	.constantPool {
+		// 0
+		instanceFieldRef short TransactionTest/var;
+		// 1
+		instanceFieldRef byte[] TransactionTest/array;
+		// 2
+		instanceFieldRef byte[] TransactionTest/reserve;
+		// 3
+		staticMethodRef TransactionTest/<init>()V;
+		// 4
+		classRef TransactionTest;
+		// 5
+		staticMethodRef 0.3.0()V;		// javacard/framework/Applet.<init>()V
+		// 6
+		virtualMethodRef 0.3.1()V;		// register()V
+		// 7
+		virtualMethodRef 0.10.1()[B;		// getBuffer()[B
+		// 8
+		virtualMethodRef 0.3.3()Z;		// selectingApplet()Z
+		// 9
+		staticMethodRef 0.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 10
+		staticMethodRef 0.8.1()V;		// javacard/framework/JCSystem.beginTransaction()V
+		// 11
+		staticMethodRef 0.16.6([BSS)S;		// javacard/framework/Util.setShort([BSS)S
+		// 12
+		staticMethodRef 0.8.2()V;		// javacard/framework/JCSystem.commitTransaction()V
+		// 13
+		virtualMethodRef 0.10.7()S;		// setOutgoing()S
+		// 14
+		virtualMethodRef 0.10.9(S)V;		// setOutgoingLength(S)V
+		// 15
+		virtualMethodRef 0.10.4(SS)V;		// sendBytes(SS)V
+		// 16
+		staticMethodRef 0.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+		// 17
+		staticMethodRef 0.16.1([BS[BSS)S;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+		// 18
+		virtualMethodRef TransactionTest/my_native_method(BBB)V;
+		// 19
+		staticMethodRef 0.8.18()V;		// javacard/framework/JCSystem.requestObjectDeletion()V
+		// 20
+		staticFieldRef short TransactionTest/static_var;
+		// 21
+		staticMethodRef 0.8.13(SB)[B;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+		// 22
+		classRef 0.10;		// javacard/framework/APDU
+		// 23
+		classRef 0.9;		// javacard/framework/OwnerPIN
+		// 24
+		staticMethodRef 0.9.0(BB)V;		// javacard/framework/OwnerPIN.<init>(BB)V
+		// 25
+		staticFieldRef 0.9 TransactionTest/pin;
+		// 26
+		staticFieldRef byte[] TransactionTest/stat_array;
+	}
+
+	.class public TransactionTest 0 extends 0.3 {		// extends javacard/framework/Applet
+
+		.fields {
+			 byte[] array 0;		// [B
+			 byte[] reserve 1;		// [B
+			 short var 2;		// S
+			private static final byte INS_EXCEPTION = 1;		// B
+			private static final byte INS_ATOM_COPY = 2;		// B
+			private static final byte INS_GET_VAR = 3;		// B
+			private static final byte INS_FILL_ARRAY = 4;		// B
+			private static final byte INS_COPY_ARRAY = 5;		// B
+			private static final byte INS_GET_APDU_BYTE = 6;		// B
+			private static final byte INS_SET_INT = 7;		// B
+			private static final byte INS_NEW_ARRAY = 8;		// B
+			private static final byte INS_NATIVE_METHOD = 9;		// B
+			private static final byte INS_CYCLIC_TEST = 10;		// B
+			private static final byte INS_GC_CALL = 11;		// B
+			private static final byte INS_PUT_STATIC = 12;		// B
+			static short static_var;		// S
+			static byte[] stat_array;		// [B
+			static 0.9 pin;		// Ljavacard/framework/OwnerPIN;
+		}
+
+		.publicMethodTable 7 {
+			equals(Ljava/lang/Object;)Z;
+			register()V;
+			register([BSB)V;
+			selectingApplet()Z;
+			deselect()V;
+			getShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;;
+			select()Z;
+			process(Ljavacard/framework/APDU;)V;
+			my_native_method(BBB)V;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public static install([BSB)V 0 {
+			.stack 2;
+			.locals 0;
+
+				L0:	new 4;		// transaction_test/TransactionTest
+					dup;
+					invokespecial 3;		// transaction_test/TransactionTest.<init>()V
+					pop;
+					return;
+		}
+
+		.method protected <init>()V 1 {
+			.stack 2;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 5;		// javacard/framework/Applet.<init>()V
+					aload_0;
+					sconst_0;
+					putfield_s 0;		// short transaction_test/TransactionTest.var
+					aload_0;
+					sspush 4096;
+					newarray 11;
+					putfield_a 1;		// reference transaction_test/TransactionTest.array
+					aload_0;
+					sspush 256;
+					newarray 11;
+					putfield_a 2;		// reference transaction_test/TransactionTest.reserve
+					aload_0;
+					invokevirtual 6;		// register()V
+					return;
+		}
+
+		.method public process(Ljavacard/framework/APDU;)V 7 {
+			.stack 5;
+			.locals 12;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_1;
+					invokevirtual 7;		// getBuffer()[B
+					astore_2;
+					aload_0;
+					invokevirtual 8;		// selectingApplet()Z
+					ifeq L2;
+				L1:	sspush -28672;
+					invokestatic 9;		// javacard/framework/ISOException.throwIt(S)V
+					return;
+				L2:	aload_2;
+					sconst_0;
+					baload;
+					sstore_3;
+					aload_2;
+					sconst_1;
+					baload;
+					sstore 4;
+					aload_2;
+					sconst_4;
+					baload;
+					sstore 5;
+					aload_2;
+					sconst_2;
+					baload;
+					sstore 6;
+					sload_3;
+					ifeq L4;
+				L3:	sspush 28160;
+					invokestatic 9;		// javacard/framework/ISOException.throwIt(S)V
+				L4:	sload 4;
+					stableswitch L28 1 12 L5 L6 L7 L8 L12 L16 L17 L18 L19 L20 L26 L27;
+				L5:	sconst_1;
+					sconst_0;
+					sdiv;
+					s2b;
+					sstore 7;
+					aload_0;
+					sspush 4660;
+					putfield_s 0;		// short transaction_test/TransactionTest.var
+					goto_w L28;
+				L6:	invokestatic 10;		// javacard/framework/JCSystem.beginTransaction()V
+					aload_2;
+					sconst_0;
+					getfield_s_this 0;		// short transaction_test/TransactionTest.var
+					invokestatic 11;		// javacard/framework/Util.setShort([BSS)S
+					pop;
+					invokestatic 12;		// javacard/framework/JCSystem.commitTransaction()V
+					goto_w L28;
+				L7:	aload_1;
+					invokevirtual 13;		// setOutgoing()S
+					pop;
+					aload_1;
+					sconst_2;
+					invokevirtual 14;		// setOutgoingLength(S)V
+					aload_2;
+					sconst_0;
+					getfield_s_this 0;		// short transaction_test/TransactionTest.var
+					sspush 255;
+					sand;
+					s2b;
+					bastore;
+					aload_2;
+					sconst_1;
+					getfield_s_this 0;		// short transaction_test/TransactionTest.var
+					bspush 8;
+					sshr;
+					sspush 255;
+					sand;
+					s2b;
+					bastore;
+					aload_1;
+					sconst_0;
+					sconst_2;
+					invokevirtual 15;		// sendBytes(SS)V
+					goto_w L28;
+				L8:	sconst_0;
+					sstore 8;
+					invokestatic 10;		// javacard/framework/JCSystem.beginTransaction()V
+					sconst_0;
+					sstore 8;
+				L9:	sload 8;
+					sconst_1;
+					if_scmpge L11;
+				L10:	getfield_a_this 1;		// reference transaction_test/TransactionTest.array
+					sconst_0;
+					sspush 4096;
+					sload 6;
+					invokestatic 16;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					sload 8;
+					sconst_1;
+					sadd;
+					s2b;
+					sstore 8;
+					goto L9;
+				L11:	invokestatic 12;		// javacard/framework/JCSystem.commitTransaction()V
+					goto_w L28;
+				L12:	sconst_0;
+					sstore 9;
+				L13:	sload 9;
+					sspush 255;
+					if_scmpge L15;
+				L14:	getfield_a_this 2;		// reference transaction_test/TransactionTest.reserve
+					sload 9;
+					sload 9;
+					s2b;
+					bastore;
+					sinc 9 1;
+					goto L13;
+				L15:	invokestatic 10;		// javacard/framework/JCSystem.beginTransaction()V
+					getfield_a_this 2;		// reference transaction_test/TransactionTest.reserve
+					sconst_0;
+					getfield_a_this 1;		// reference transaction_test/TransactionTest.array
+					sconst_0;
+					sspush 256;
+					invokestatic 17;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					invokestatic 12;		// javacard/framework/JCSystem.commitTransaction()V
+					goto_w L28;
+				L16:	aload_2;
+					bspush -99;
+					baload;
+					sstore 9;
+					aload_2;
+					bspush -100;
+					bspush 87;
+					bastore;
+					goto L28;
+				L17:	iipush 305419896;
+					istore 10;
+					goto L28;
+				L18:	sspush 1024;
+					newarray 11;
+					astore 12;
+					goto L28;
+				L19:	aload_0;
+					sconst_0;
+					sconst_1;
+					sconst_2;
+					invokevirtual 18;		// my_native_method(BBB)V
+					goto L28;
+				L20:	sconst_0;
+					sstore 13;
+					sconst_0;
+					sstore 13;
+				L21:	sload 13;
+					sspush 1000;
+					if_scmpge L28;
+				L22:	invokestatic 10;		// javacard/framework/JCSystem.beginTransaction()V
+					getfield_a_this 2;		// reference transaction_test/TransactionTest.reserve
+					sconst_0;
+					getfield_a_this 1;		// reference transaction_test/TransactionTest.array
+					sconst_0;
+					sspush 256;
+					invokestatic 17;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					invokestatic 12;		// javacard/framework/JCSystem.commitTransaction()V
+					sload 13;
+					bspush 100;
+					srem;
+					ifne L24;
+				L23:	goto L25;
+				L24:	aload_1;
+					invokevirtual 13;		// setOutgoing()S
+					pop;
+					aload_1;
+					sconst_2;
+					invokevirtual 14;		// setOutgoingLength(S)V
+					aload_2;
+					sconst_0;
+					sload 13;
+					sspush 255;
+					sand;
+					s2b;
+					bastore;
+					aload_2;
+					sconst_1;
+					sload 13;
+					bspush 8;
+					sshr;
+					sspush 255;
+					sand;
+					s2b;
+					bastore;
+					aload_1;
+					sconst_0;
+					sconst_2;
+					invokevirtual 15;		// sendBytes(SS)V
+				L25:	sinc 13 1;
+					goto L21;
+				L26:	invokestatic 19;		// javacard/framework/JCSystem.requestObjectDeletion()V
+					goto L28;
+				L27:	sconst_0;
+					putstatic_s 20;		// short transaction_test/TransactionTest.static_var
+				L28:	bspush 10;
+					sconst_2;
+					invokestatic 21;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					astore 7;
+					aload_1;
+					astore 8;
+					bspush 16;
+					newarray 11;
+					astore 9;
+					bspush 9;
+					anewarray 22;		// javacard/framework/APDU
+					astore 10;
+					aload 9;
+					sconst_3;
+					bspush 35;
+					bastore;
+					new 23;		// javacard/framework/OwnerPIN
+					dup;
+					sconst_3;
+					sconst_5;
+					invokespecial 24;		// javacard/framework/OwnerPIN.<init>(BB)V
+					putstatic_a 25;		// reference transaction_test/TransactionTest.pin
+					sconst_5;
+					newarray 11;
+					putstatic_a 26;		// reference transaction_test/TransactionTest.stat_array
+					getstatic_a 26;		// reference transaction_test/TransactionTest.stat_array
+					sconst_0;
+					sconst_4;
+					bastore;
+					return;
+		}
+
+		.method public my_native_method(BBB)V 8 {
+			.stack 5;
+			.locals 15;
+
+				L0:	sconst_0;
+					sstore 4;
+					sconst_0;
+					sstore 5;
+					sconst_0;
+					sstore 6;
+					sconst_0;
+					sstore 7;
+					sconst_0;
+					sstore 8;
+					sconst_0;
+					sstore 9;
+					sconst_0;
+					sstore 10;
+					sconst_0;
+					sstore 11;
+					sconst_0;
+					sstore 12;
+					sconst_0;
+					sstore 13;
+					sconst_0;
+					sstore 14;
+					sconst_0;
+					sstore 15;
+					sconst_0;
+					sstore 16;
+					sconst_0;
+					sstore 17;
+					sconst_0;
+					sstore 18;
+					getfield_a_this 2;		// reference transaction_test/TransactionTest.reserve
+					sconst_0;
+					getfield_a_this 1;		// reference transaction_test/TransactionTest.array
+					sconst_0;
+					sspush 256;
+					invokestatic 17;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					return;
+		}
+
+	}
+
+}

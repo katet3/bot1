@@ -1,0 +1,38 @@
+jc_2.1.0 In this specification, the major version of the CAP file has the value 2 and the minor version has the value 1. Only Sun Microsystems, Inc. may define the meaning and values of new CAP file versions. 
+jc_2.1.1 In this specification, the major version of the CAP file has the value 2 and the minor version has the value 1. Only Sun Microsystems, Inc. may define the meaning and values of new CAP file versions. 
+jc_2.2.2 In this specification, the major version of the CAP file format has the value 2 and the minor version has the value 2. Only Sun Microsystems, Inc. may define the meaning and values of new CAP file format versions. 
+jc_3.0.1 In this specification, the major version of the CAP file format has the value 2 and the minor version has the value 2. Only Sun Microsystems, Inc. may define the meaning and values of new CAP file format versions. 
+jc_3.0.4 In this specification, the major version of the CAP file format has the value 2 and the minor version has the value 2. Only Oracle, Inc. may define the meaning and values of new CAP file format versions. 
+jc_3.0.5 In this specification, the major version of the CAP file format has the value 2 and the minor version has the value 2. Only Oracle Corp. may define the meaning and values of new CAP file format versions 
+jc_3.1.0 In this specification, the major version of the CAP file format has the value 2 and the minor version has the value 3. A Java Card Virtual Machine must support minor version values between 1 and 3. Only Oracle Corp. may define the meaning and values of new CAP file format versions. 
+jc_3.2.0 In this specification, the major version of the CAP file format has the value 2 and the minor version has the value 3. A Java Card Virtual Machine must support minor version values between 1 and 3. Only Oracle Corp. may define the meaning and values of new CAP file format versions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

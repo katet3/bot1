@@ -1,0 +1,6 @@
+cap_parser/test.cap
+**/__pycache__
+api_classic
+cfg_output
+ir_output
+jvm_ir_output
