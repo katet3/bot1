@@ -1,0 +1,5 @@
+# Tested integration. angr 10 requires Python 3.12 or newer.
+-r requirements-pysoot.txt
+angr==10.0.4.post1
+cle==10.0.4
+archinfo==10.0.4

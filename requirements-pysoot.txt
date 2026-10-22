@@ -1,0 +1,2 @@
+# Real pysoot object model; fixed source revision, not the obsolete PyPI package.
+pysoot @ git+https://github.com/angr/pysoot.git@16ab55db71a162efea3d44251fb93893140bbef2

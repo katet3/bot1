@@ -1,0 +1,100 @@
+Python 3.12.14 / Linux
+angr: 10.0.4.post1
+cle: 10.0.4
+archinfo: 10.0.4
+pysoot: 8.0.0.dev0
+z3-solver: 5.1.0.0
+
+$ python -m unittest discover -s pysoot_adapter/tests -v
+test_abstract_interface_and_interface_call (test_adapter.AdapterTests.test_abstract_interface_and_interface_call) ... ok
+test_backend_import_does_not_start_jvm (test_adapter.AdapterTests.test_backend_import_does_not_start_jvm) ... ok
+test_bad_parameter_and_unknown_schema_rejected (test_adapter.AdapterTests.test_bad_parameter_and_unknown_schema_rejected) ... ok
+test_constructor_calls_and_definition_are_renamed_together (test_adapter.AdapterTests.test_constructor_calls_and_definition_are_renamed_together) ... ok
+test_exception_edges_order_and_traps_are_not_declared_throws (test_adapter.AdapterTests.test_exception_edges_order_and_traps_are_not_declared_throws) ... ok
+test_external_calls_remain_explicit_obligations (test_adapter.AdapterTests.test_external_calls_remain_explicit_obligations) ... ok
+test_fields_use_name_then_owner_and_reuse_receiver_local (test_adapter.AdapterTests.test_fields_use_name_then_owner_and_reuse_receiver_local) ... ok
+test_internal_virtual_alias_resolves_to_declared_method (test_adapter.AdapterTests.test_internal_virtual_alias_resolves_to_declared_method) ... ok
+test_missing_class_or_method_metadata_fails (test_adapter.AdapterTests.test_missing_class_or_method_metadata_fails) ... ok
+test_real_nodes_branch_targets_are_unit_labels_not_block_indices (test_adapter.AdapterTests.test_real_nodes_branch_targets_are_unit_labels_not_block_indices) ... ok
+test_short_wraparound_preserved_by_cast_sequence (test_adapter.AdapterTests.test_short_wraparound_preserved_by_cast_sequence) ... ok
+test_static_field_null_unary_and_array_nodes (test_adapter.AdapterTests.test_static_field_null_unary_and_array_nodes) ... ok
+test_switch_shared_targets_and_default (test_adapter.AdapterTests.test_switch_shared_targets_and_default) ... ok
+test_throw_is_preserved_with_backend_requirement (test_adapter.AdapterTests.test_throw_is_preserved_with_backend_requirement) ... ok
+test_all_nine_methods_preserve_instructions_edges_and_offsets (test_adapter.CAPIntegrationTests.test_all_nine_methods_preserve_instructions_edges_and_offsets) ... ok
+test_class_offsets_are_info_relative_and_join_is_not_positional (test_adapter.CAPIntegrationTests.test_class_offsets_are_info_relative_and_join_is_not_positional) ... ok
+test_constructor_access_flags_and_field_declarations (test_adapter.CAPIntegrationTests.test_constructor_access_flags_and_field_declarations) ... ok
+test_diagnostics_export_is_deterministic_and_has_source_mapping (test_adapter.CAPIntegrationTests.test_diagnostics_export_is_deterministic_and_has_source_mapping) ... ok
+test_metadata_requires_offsets_and_matching_imports (test_adapter.CAPIntegrationTests.test_metadata_requires_offsets_and_matching_imports) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.190s
+
+OK
+Exit code: 0
+
+$ python -m unittest discover -s angr_integration/tests -v
+test_actual_cap_pipeline_loads_all_methods_and_exports_source_map (test_loader.LoaderTests.test_actual_cap_pipeline_loads_all_methods_and_exports_source_map) ... ok
+test_bad_arguments_and_entry_keys_are_explicit_errors (test_loader.LoaderTests.test_bad_arguments_and_entry_keys_are_explicit_errors) ... ok
+test_exception_metadata_survives_loading_and_blocks_execution (test_loader.LoaderTests.test_exception_metadata_survives_loading_and_blocks_execution) ... ok
+test_external_call_loaded_but_never_given_an_unconstrained_return (test_loader.LoaderTests.test_external_call_loaded_but_never_given_an_unconstrained_return) ... ok
+test_internal_static_call_transfers_args_and_returns_to_caller (test_loader.LoaderTests.test_internal_static_call_transfers_args_and_returns_to_caller) ... ok
+test_interpreter_errors_are_recorded_not_skipped (test_loader.LoaderTests.test_interpreter_errors_are_recorded_not_skipped) ... ok
+test_loop_step_budget_keeps_active_state (test_loader.LoaderTests.test_loop_step_budget_keeps_active_state) ... ok
+test_multiple_methods_do_not_choose_an_arbitrary_entry (test_loader.LoaderTests.test_multiple_methods_do_not_choose_an_arbitrary_entry) ... ok
+test_primitive_widths_and_sign_extension (test_loader.LoaderTests.test_primitive_widths_and_sign_extension) ... ok
+test_real_loader_no_lifter_jvm_or_implicit_library_bodies (test_loader.LoaderTests.test_real_loader_no_lifter_jvm_or_implicit_library_bodies) ... ok
+test_receiver_is_explicit_and_base_state_is_copied (test_loader.LoaderTests.test_receiver_is_explicit_and_base_state_is_copied) ... ok
+test_short_wraparound_casts_are_executed_by_angr (test_loader.LoaderTests.test_short_wraparound_casts_are_executed_by_angr) ... ok
+test_source_address_roundtrip_distinguishes_labels_blocks_and_offsets (test_loader.LoaderTests.test_source_address_roundtrip_distinguishes_labels_blocks_and_offsets) ... ok
+test_switch_shared_targets_negative_case_and_default (test_loader.LoaderTests.test_switch_shared_targets_negative_case_and_default) ... ok
+test_symbolic_signed_branch_forks_and_solves_real_constraints (test_loader.LoaderTests.test_symbolic_signed_branch_forks_and_solves_real_constraints) ... ok
+test_unknown_direct_address_cannot_use_stock_unconstrained_fallback (test_loader.LoaderTests.test_unknown_direct_address_cannot_use_stock_unconstrained_fallback) ... ok
+test_unsupported_callee_is_rejected_transitively (test_loader.LoaderTests.test_unsupported_callee_is_rejected_transitively) ... ok
+test_unsupported_operand_shapes_do_not_claim_execution_readiness (test_loader.LoaderTests.test_unsupported_operand_shapes_do_not_claim_execution_readiness) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 1.166s
+
+OK
+Exit code: 0
+
+$ python main.py --no-png --quiet
+Обработано методов: 9
+Результаты: /workspace/scratch/bc0f13b9461c/project_review/outputs
+pysoot: классов 1, методов 9
+angr: проект загружен; вход: 7c0f1b01883c@1.0:internal:t6:o1
+Исполнение апплета не запускалось; ограничения указаны в angr_output/load_report.txt
+Внешних символов без привязки: 19
+ERROR    | 2026-10-21 06:18:51,077 | angr.state_plugins.unicorn_engine | failed loading "unicornlib.so", unicorn support disabled ('NoneType' object has no attribute 'unicorn_py3')
+Exit code: 0
+
+$ python -m angr_integration.demo
+{
+  "example": "synthetic primitive method; not the Java Card applet",
+  "engine": "CheckedSootEngine",
+  "deadended": 2,
+  "errored": 0,
+  "paths": [
+    {
+      "input_signed": -32768,
+      "input_bits_hex": "0x8000",
+      "return_value": -7,
+      "constraints": [
+        "<Bool SignExt(16, input_short) <s 0x0>"
+      ]
+    },
+    {
+      "input_signed": 0,
+      "input_bits_hex": "0x0000",
+      "return_value": 7,
+      "constraints": [
+        "<Bool SignExt(16, input_short) >=s 0x0>"
+      ]
+    }
+  ]
+}
+Результаты: /workspace/scratch/bc0f13b9461c/project_review/outputs/angr_demo
+ERROR    | 2026-10-21 06:18:52,571 | angr.state_plugins.unicorn_engine | failed loading "unicornlib.so", unicorn support disabled ('NoneType' object has no attribute 'unicorn_py3')
+Exit code: 0
+
+No JVM, JAR lifting, applet execution or PNG rendering performed.

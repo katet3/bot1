@@ -65,6 +65,7 @@ class InterfaceInfo:
     interface_count: int
     superinterfaces: List[ClassRef]
     interface_name: bytes | None
+    offset: int | None = None  # Class.cap info-relative offset (after tag/size).
 
 def parse_interface_info(reader: BinaryReader):
     bitfield = reader.read_u1()
@@ -168,6 +169,7 @@ class ClassInfo:
     package_virtual_method_table: List[int]
     interfaces: List[ImplementedInterfaceInfo]
     remote_info: RemoteInterfaceInfo | None
+    offset: int | None = None  # Join Class.cap declarations with Descriptor.cap.
 
 def parse_class_info(reader: BinaryReader):
     bitfield = reader.read_u1()
@@ -265,9 +267,13 @@ class ClassComponent(CAPComponent):
             is_interface = (flags & 0x8) != 0
 
             if is_interface:
-                interfaces.append(parse_interface_info(reader))
+                interface = parse_interface_info(reader)
+                interface.offset = pos - 3
+                interfaces.append(interface)
             else:
-                classes.append(parse_class_info(reader))
+                class_info = parse_class_info(reader)
+                class_info.offset = pos - 3
+                classes.append(class_info)
 
         if reader.offset != component_end:
             raise ValueError("Class component size mismatch")

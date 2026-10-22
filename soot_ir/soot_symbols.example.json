@@ -2,7 +2,8 @@
   "package_aid": "7c0f1b01883c",
   "package_version": [1, 0],
   "imports": [
-    {"aid": "a0000000620101", "version": [1, 4]}
+    {"aid": "a0000000620101", "version": [1, 4]},
+    {"aid": "a0000000620001", "version": [1, 0]}
   ],
   "class_names": {},
   "method_names": {},

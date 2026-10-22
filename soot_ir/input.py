@@ -61,6 +61,7 @@ def op_name(stmt):
     op = stmt["op"]
     return {
         "load": "load_local", "store": "store_local",
+        "compare_signed": "compare",
         "field_load": "load_field", "field_store": "store_field",
         "new": "new_object", "arraylength": "array_length",
     }.get(op, op)
