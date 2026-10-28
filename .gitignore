@@ -2,4 +2,4 @@ cap_parser/test.cap
 **/__pycache__
 api_classic
 /outputs/
-.venv-angr10
+/.venv-angr10/
