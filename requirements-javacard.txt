@@ -1,0 +1,3 @@
+# Optional concrete DES backend for the explicit name1 API profile.
+-r requirements-angr.txt
+pycryptodome==4.1.0

@@ -62,6 +62,7 @@ class Op(str, Enum):
     BINARY = 'binary'
     UNARY = 'unary'
     CONVERT = 'convert'
+    CHECKCAST = 'checkcast'
     COMPARE = 'compare'
     INCREMENT = 'increment_local'
     FIELD_LOAD = 'load_field'

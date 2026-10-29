@@ -97,6 +97,28 @@ def lower(ins, resolver):
         return emit(Op.NEW_ARRAY, Type(kinds[one()]+'[]'), (kinds[one()],), pops=(SHORT,), pushes=(REF,), size=2)
     if m == 'anewarray':
         return emit(Op.NEW_ARRAY, Type('reference[]'), ref=resolve((1,)), pops=(SHORT,), pushes=(REF,), size=3)
+    if m == 'checkcast':
+        if len(args) != 2 or any(type(x) is not int for x in args):
+            raise IRValidationError('checkcast: expected atype and class index')
+        atype, index = args
+        if atype in (0, 14):
+            if resolver is None:
+                raise IRValidationError('checkcast: ReferenceResolver is required')
+            ref, typ = resolver.class_type(index, array=atype == 14)
+        elif atype in (10, 11, 12, 13) and index == 0:
+            ref = None
+            typ = Type({10:'boolean[]', 11:'byte[]', 12:'short[]', 13:'int[]'}[atype])
+        else:
+            raise IRValidationError('Invalid checkcast atype or class index')
+        return emit(Op.CHECKCAST, typ, pops=(REF,), pushes=(typ,), ref=ref, size=4)
+    if m == 'invokeinterface':
+        if resolver is None or len(args) != 3 or any(type(x) is not int for x in args):
+            raise IRValidationError('invokeinterface: expected nargs, class index, method token and resolver')
+        nargs, index, token = args
+        ref = resolver.resolve_interface(index, token, nargs)
+        sig = ref.signature
+        return emit(Op.CALL, sig.returns, (m,), pops=(REF,) + sig.parameters,
+                    pushes=() if sig.returns.kind == 'void' else (sig.returns,), ref=ref, size=5)
     if m in ('invokevirtual','invokespecial','invokestatic'):
         tags={'invokevirtual':(3,), 'invokespecial':(4,6), 'invokestatic':(6,)}
         ref=resolve(tags[m]); sig=ref.signature

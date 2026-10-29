@@ -359,17 +359,22 @@ class CAPIntegrationTests(unittest.TestCase):
         from cap_decompile.components.class_component import ClassComponent
         from cap_decompile.components.header import CAPVersion
         one = bytes([0, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0])
-        data = b"\x06" + (2 * len(one)).to_bytes(2, "big") + one + one
-        component = ClassComponent.parse_from_bytes(data, CAPVersion.V22)
-        self.assertEqual([c.offset for c in component.classes], [0, 10])
-        first = self.cap.descriptor.classes[0]
-        a = replace(first, fields=[], methods=[], field_count=0, method_count=0)
-        other = replace(a, this_class_ref=10, token=1)
-        cap = replace(self.cap, class_component=replace(component, classes=list(reversed(component.classes))),
-                      descriptor=replace(self.cap.descriptor, classes=[a, other], class_count=2))
-        metadata = metadata_from_cap(cap, self.symbols)
-        self.assertEqual([c.offset for c in metadata.classes], [0, 10])
-        self.assertNotEqual(metadata.classes[0].name, metadata.classes[1].name)
+        # CAP 2.2 includes a u2 signature_pool_length, even for an empty pool.
+        for version, prefix in ((CAPVersion.V21, b""), (CAPVersion.V22, b"\x00\x00")):
+            with self.subTest(version=version):
+                base = len(prefix)
+                body = prefix + one + one
+                data = b"\x06" + len(body).to_bytes(2, "big") + body
+                component = ClassComponent.parse_from_bytes(data, version)
+                self.assertEqual([c.offset for c in component.classes], [base, base + 10])
+                first = self.cap.descriptor.classes[0]
+                a = replace(first, this_class_ref=base, fields=[], methods=[], field_count=0, method_count=0)
+                other = replace(a, this_class_ref=base + 10, token=1)
+                cap = replace(self.cap, class_component=replace(component, classes=list(reversed(component.classes))),
+                              descriptor=replace(self.cap.descriptor, classes=[a, other], class_count=2))
+                metadata = metadata_from_cap(cap, self.symbols)
+                self.assertEqual([c.offset for c in metadata.classes], [base, base + 10])
+                self.assertNotEqual(metadata.classes[0].name, metadata.classes[1].name)
 
     def test_diagnostics_export_is_deterministic_and_has_source_mapping(self):
         original = self.program.to_json()

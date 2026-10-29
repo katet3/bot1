@@ -39,6 +39,7 @@ class SymbolTable:
     method_names: dict[str, str] = field(default_factory=dict)
     field_names: dict[str, str] = field(default_factory=dict)
     catch_types: dict[int, str] = field(default_factory=dict)
+    interface_signatures: dict[str, dict] = field(default_factory=dict)
 
     def __post_init__(self):
         self.package = package_key(self.package_aid, self.package_version)
@@ -56,6 +57,7 @@ class SymbolTable:
             dict(data.get("class_names", {})), dict(data.get("method_names", {})),
             dict(data.get("field_names", {})),
             {int(k): v for k, v in data.get("catch_types", {}).items()},
+            dict(data.get("interface_signatures", {})),
         )
 
     def class_name(self, aid, version, class_id, external):

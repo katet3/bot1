@@ -1,0 +1,2184 @@
+{
+  "base_commit": "071753ddf57b4182ee94eebd49147a2b84a19a7b",
+  "date": "2026-10-29",
+  "python_modules": [
+    {
+      "path": "angr_integration/__init__.py",
+      "lines": 8,
+      "definitions": [],
+      "sha256": "7c45b2a12f35399e7b997968cd3106a4feefeb87ee89fa25bdde5d8270e9149f"
+    },
+    {
+      "path": "angr_integration/backend.py",
+      "lines": 24,
+      "definitions": [
+        {
+          "class": "CAPSootBackend",
+          "methods": [
+            "__init__"
+          ]
+        }
+      ],
+      "sha256": "833a02cae51dcabeaaf8f9f9acc3280e2f2aab1905e423935e89485f5f15c139"
+    },
+    {
+      "path": "angr_integration/calls.py",
+      "lines": 97,
+      "definitions": [
+        {
+          "class": "CallTarget",
+          "methods": []
+        },
+        {
+          "function": "invocation_mode"
+        },
+        {
+          "class": "CallResolver",
+          "methods": [
+            "__init__",
+            "resolve",
+            "potential_targets"
+          ]
+        }
+      ],
+      "sha256": "f9f33fa940ed12d3fa8e5bfd7e1005e81c2e116e89c418e43333ebfaefc6498f"
+    },
+    {
+      "path": "angr_integration/demo.py",
+      "lines": 75,
+      "definitions": [
+        {
+          "function": "signed"
+        },
+        {
+          "function": "build_example"
+        },
+        {
+          "function": "run_demo"
+        },
+        {
+          "function": "main"
+        }
+      ],
+      "sha256": "843ae79b1937d8e26e2f6aaa9e81ec9852a108f0fc61c2b01ddead47a79195a4"
+    },
+    {
+      "path": "angr_integration/dependencies.py",
+      "lines": 33,
+      "definitions": [
+        {
+          "function": "load_dependencies"
+        }
+      ],
+      "sha256": "50138fa702a084e04936c850a97976f63c423fa99b26b4a471113e4e27f6e163"
+    },
+    {
+      "path": "angr_integration/errors.py",
+      "lines": 23,
+      "definitions": [
+        {
+          "class": "LoaderError",
+          "methods": []
+        },
+        {
+          "class": "DependencyError",
+          "methods": []
+        },
+        {
+          "class": "ExecutionNotReady",
+          "methods": []
+        },
+        {
+          "class": "HeapError",
+          "methods": [
+            "__init__"
+          ]
+        }
+      ],
+      "sha256": "6528a5d1ff87ae37e53a9a2d83c98464f0a0660a6ee8be6f35217c21a46dbd05"
+    },
+    {
+      "path": "angr_integration/heap.py",
+      "lines": 242,
+      "definitions": [
+        {
+          "class": "HeapReference",
+          "methods": []
+        },
+        {
+          "class": "_Array",
+          "methods": []
+        },
+        {
+          "class": "CAPHeap",
+          "methods": [
+            "__init__",
+            "copy",
+            "merge",
+            "widen",
+            "_require",
+            "default",
+            "validate_reference",
+            "normalize",
+            "new_object",
+            "_field_key",
+            "read_field",
+            "write_field",
+            "_check_allocation",
+            "_check_stored_reference",
+            "_int32",
+            "new_array",
+            "_array",
+            "array_length",
+            "_index",
+            "read_array",
+            "write_array",
+            "read_slice",
+            "write_slice",
+            "transaction_snapshot",
+            "restore_transaction",
+            "cast_reference"
+          ]
+        }
+      ],
+      "sha256": "0d8e072de38592d443a3bb4c690998a01637f9585884712d4e1d87b7aeb831c4"
+    },
+    {
+      "path": "angr_integration/heap_types.py",
+      "lines": 100,
+      "definitions": [
+        {
+          "function": "is_reference_type"
+        },
+        {
+          "function": "is_value_type"
+        },
+        {
+          "class": "HeapSchema",
+          "methods": [
+            "__init__",
+            "lineage",
+            "allocation_fields",
+            "field",
+            "assignable"
+          ]
+        }
+      ],
+      "sha256": "517b76e751177e7b9493952c5f55429a92aa1e1f4ea35750b5aabb26c0957f2f"
+    },
+    {
+      "path": "angr_integration/index.py",
+      "lines": 109,
+      "definitions": [
+        {
+          "class": "SourceLocation",
+          "methods": [
+            "to_dict"
+          ]
+        },
+        {
+          "class": "MethodIndex",
+          "methods": [
+            "__init__",
+            "method",
+            "key_for_descriptor",
+            "entry",
+            "address",
+            "at_label",
+            "at_offset",
+            "source"
+          ]
+        }
+      ],
+      "sha256": "d6c0634172195713271774d2e5676b0949d98ee6be4d8b3a99890c89a57f83d9"
+    },
+    {
+      "path": "angr_integration/javacard_api.py",
+      "lines": 363,
+      "definitions": [
+        {
+          "class": "ISOExit",
+          "methods": [
+            "__init__"
+          ]
+        },
+        {
+          "class": "APIModel",
+          "methods": []
+        },
+        {
+          "class": "DESKeyState",
+          "methods": []
+        },
+        {
+          "class": "CipherState",
+          "methods": []
+        },
+        {
+          "class": "JavaCardState",
+          "methods": [
+            "__init__",
+            "copy",
+            "merge",
+            "widen",
+            "event",
+            "begin",
+            "commit",
+            "abort",
+            "deselect"
+          ]
+        },
+        {
+          "function": "integer"
+        },
+        {
+          "function": "byte_values"
+        },
+        {
+          "function": "des_crypt"
+        },
+        {
+          "class": "Name1API",
+          "methods": [
+            "__init__",
+            "lookup",
+            "accepts_receiver",
+            "_slice",
+            "invoke",
+            "_applet_init",
+            "_register",
+            "_selecting",
+            "_get_buffer",
+            "_receive",
+            "_send",
+            "_throw_iso",
+            "_begin",
+            "_commit",
+            "_request_deletion",
+            "_array_copy",
+            "_build_key",
+            "_set_key",
+            "_cipher_instance",
+            "_cipher_init",
+            "_cipher_final"
+          ]
+        }
+      ],
+      "sha256": "08742bb4838873a141ccc8c7b341ab579bb04bbf2cb2f6fd6aecb4114f8fcbd8"
+    },
+    {
+      "path": "angr_integration/javacard_session.py",
+      "lines": 149,
+      "definitions": [
+        {
+          "class": "CommandFault",
+          "methods": []
+        },
+        {
+          "class": "CommandRun",
+          "methods": [
+            "summary"
+          ]
+        },
+        {
+          "class": "JavaCardSession",
+          "methods": [
+            "__init__",
+            "run",
+            "install",
+            "_byte",
+            "prepare_command",
+            "transmit",
+            "choose"
+          ]
+        }
+      ],
+      "sha256": "4fc43108defb3185015b29a19315f4de0b8b65103d22a3a2a21fcfe36159b81a"
+    },
+    {
+      "path": "angr_integration/loader.py",
+      "lines": 162,
+      "definitions": [
+        {
+          "class": "LoadedProgram",
+          "methods": [
+            "method_address",
+            "address_for_label",
+            "addresses_for_offset",
+            "source_location",
+            "create_call_state",
+            "create_heap_state",
+            "to_dict",
+            "export"
+          ]
+        },
+        {
+          "class": "AngrLoader",
+          "methods": [
+            "load"
+          ]
+        }
+      ],
+      "sha256": "08b14a2bb1b9dbd7f8fd6f5a87474bfb971754f1176b909a74c1103e34b72a4e"
+    },
+    {
+      "path": "angr_integration/memory_demo.py",
+      "lines": 110,
+      "definitions": [
+        {
+          "function": "build_example"
+        },
+        {
+          "function": "signed"
+        },
+        {
+          "function": "run_demo"
+        },
+        {
+          "function": "main"
+        }
+      ],
+      "sha256": "e8768284ff5b177384c82dc3e268ee5efe34fc26ca5f931d7660b7406751b6ce"
+    },
+    {
+      "path": "angr_integration/name1_demo.py",
+      "lines": 120,
+      "definitions": [
+        {
+          "function": "load_name1"
+        },
+        {
+          "function": "run_demo"
+        },
+        {
+          "function": "main"
+        }
+      ],
+      "sha256": "d68d0c23d057283658ce39223656aca0c0fa7ef86369fe4d520b6b9ea7a62ab1"
+    },
+    {
+      "path": "angr_integration/readiness.py",
+      "lines": 160,
+      "definitions": [
+        {
+          "class": "ExecutionIssue",
+          "methods": [
+            "to_dict"
+          ]
+        },
+        {
+          "function": "walk"
+        },
+        {
+          "class": "ExecutionReadiness",
+          "methods": [
+            "__init__",
+            "reachable",
+            "issues",
+            "require"
+          ]
+        }
+      ],
+      "sha256": "4a042165cbd0521392ff28f9027c2d484545ac10d7083e6f6d4f206495734677"
+    },
+    {
+      "path": "angr_integration/runtime.py",
+      "lines": 123,
+      "definitions": [
+        {
+          "class": "CAPSimOS",
+          "methods": [
+            "state_blank"
+          ]
+        },
+        {
+          "class": "CAPMemoryError",
+          "methods": [
+            "__init__"
+          ]
+        },
+        {
+          "class": "CheckedSootEngine",
+          "methods": [
+            "process_successors",
+            "get_unconstrained_simprocedure",
+            "_handle_soot_stmt"
+          ]
+        }
+      ],
+      "sha256": "e7ca9532fcc697ffd4c8ac86c214b7fa6078bb782059411b82aa56ede67d9c82"
+    },
+    {
+      "path": "angr_integration/semantics.py",
+      "lines": 122,
+      "definitions": [
+        {
+          "class": "CAPInvoke",
+          "methods": [
+            "_execute"
+          ]
+        },
+        {
+          "function": "evaluate"
+        },
+        {
+          "class": "CAPAssign",
+          "methods": [
+            "_execute"
+          ]
+        },
+        {
+          "function": "translate_stmt"
+        }
+      ],
+      "sha256": "37993b3cc791db174bee0917d72924b773eb8df193c5886c5e152d388a380f99"
+    },
+    {
+      "path": "angr_integration/state.py",
+      "lines": 92,
+      "definitions": [
+        {
+          "class": "SymbolicArgument",
+          "methods": [
+            "__post_init__"
+          ]
+        },
+        {
+          "function": "encode_argument"
+        },
+        {
+          "function": "create_call_state"
+        }
+      ],
+      "sha256": "4b3428f0f2251593dff258c816e925749442f911c5febc44efb05dc0b0e0801c"
+    },
+    {
+      "path": "angr_integration/tests/test_calls.py",
+      "lines": 120,
+      "definitions": [
+        {
+          "function": "make_method"
+        },
+        {
+          "function": "call_program"
+        },
+        {
+          "class": "CallTests",
+          "methods": [
+            "test_virtual_uses_cap_token_despite_different_synthetic_names",
+            "test_special_retains_declared_super_target_and_constructor_field",
+            "test_null_instance_receiver_fault_is_not_an_unconstrained_return"
+          ]
+        },
+        {
+          "class": "RemainderTests",
+          "methods": [
+            "setUpClass",
+            "test_signed_java_remainder_and_minimum_overflow_case",
+            "test_symbolic_divisor_never_silently_drops_possible_zero",
+            "test_symbolic_dividend_preserved_for_all_signed_inputs"
+          ]
+        }
+      ],
+      "sha256": "fd40d18063a6c749d8d5a755bcfee55bf707f3e9cfb1fa5ec7aa83e694397b4a"
+    },
+    {
+      "path": "angr_integration/tests/test_heap.py",
+      "lines": 320,
+      "definitions": [
+        {
+          "function": "local"
+        },
+        {
+          "function": "const"
+        },
+        {
+          "function": "unit"
+        },
+        {
+          "function": "field"
+        },
+        {
+          "function": "array"
+        },
+        {
+          "function": "method"
+        },
+        {
+          "function": "load"
+        },
+        {
+          "function": "value_field"
+        },
+        {
+          "function": "array_method"
+        },
+        {
+          "class": "HeapTests",
+          "methods": [
+            "run_ok",
+            "run_fault",
+            "test_symbolic_paths_modify_fields_and_arrays_independently",
+            "test_new_object_default_fields_alias_and_narrow_storage",
+            "test_receiver_and_inherited_fields_are_typed_and_base_is_unchanged",
+            "test_all_primitive_arrays_defaults_length_and_storage_width",
+            "test_symbolic_primitive_array_read_preserves_all_valid_indices",
+            "test_symbolic_write_is_conditional_and_does_not_modify_base_state",
+            "test_out_of_bounds_and_possible_fault_are_not_pruned",
+            "test_null_field_array_and_length_faults_have_source_locations",
+            "test_allocation_length_is_never_clamped_or_arbitrarily_concretized",
+            "test_references_are_returned_and_alias_through_static_calls",
+            "test_reference_equality_distinguishes_alias_fresh_object_and_null",
+            "test_reference_cast_preserves_dynamic_type_and_checks_mismatch",
+            "test_foreign_or_forged_references_are_rejected",
+            "test_reference_array_defaults_covariance_and_bad_store",
+            "test_symbolic_reference_array_index_and_state_merge_fail_explicitly",
+            "test_external_hierarchy_and_static_fields_are_not_fabricated"
+          ]
+        }
+      ],
+      "sha256": "16bb6496f940feb361470908372a2f82812f6fd20bb17c9aba4dec5180b6929b"
+    },
+    {
+      "path": "angr_integration/tests/test_javacard.py",
+      "lines": 277,
+      "definitions": [
+        {
+          "class": "JavaCardTests",
+          "methods": [
+            "setUpClass",
+            "setUp",
+            "field",
+            "send",
+            "test_install_executes_constructor_and_registers_original_applet",
+            "test_commands_after_iso_exception_enter_fresh_java_frames",
+            "test_ecb_known_answer_and_cbc_match_independent_cipher_api",
+            "test_status_words_and_partial_receive_preserve_key",
+            "test_real_null_key_fault_has_exact_cap_location",
+            "test_symbolic_p1_explores_all_values_and_isolates_persistent_writes",
+            "test_symbolic_crypto_data_is_rejected_unless_uniquely_constrained",
+            "test_transaction_rollback_excludes_transient_buffer_and_key_data",
+            "test_transaction_snapshots_are_independent_and_commit_persists",
+            "test_unfinished_transaction_aborts_at_command_boundary",
+            "test_transaction_allocation_nesting_and_invalid_commit_fail_explicitly",
+            "test_normal_return_with_open_transaction_is_not_success",
+            "test_api_arraycopy_overlap_and_failure_atomicity",
+            "test_global_apdu_references_cannot_escape_to_persistent_fields",
+            "test_api_binding_identity_and_unsupported_algorithms_are_checked",
+            "test_unmodeled_interface_implementation_requires_cap_token_map",
+            "test_dofinal_iv_reset_deselect_and_key_change_guard",
+            "test_step_budget_never_reports_success_or_updates_card_state",
+            "test_single_two_three_key_des_and_degenerate_key",
+            "test_deliverable_demo_checks_every_expected_outcome"
+          ]
+        }
+      ],
+      "sha256": "07d2207ce0c46b85bc7ba547b65eed7640bb2b1e49454b1b762262cb05463acc"
+    },
+    {
+      "path": "angr_integration/tests/test_loader.py",
+      "lines": 329,
+      "definitions": [
+        {
+          "function": "local"
+        },
+        {
+          "function": "const"
+        },
+        {
+          "function": "body"
+        },
+        {
+          "function": "adapt"
+        },
+        {
+          "function": "branch_method"
+        },
+        {
+          "function": "signed32"
+        },
+        {
+          "class": "LoaderTests",
+          "methods": [
+            "execute",
+            "returns",
+            "test_real_loader_no_lifter_jvm_or_implicit_library_bodies",
+            "test_source_address_roundtrip_distinguishes_labels_blocks_and_offsets",
+            "test_symbolic_signed_branch_forks_and_solves_real_constraints",
+            "test_primitive_widths_and_sign_extension",
+            "test_short_wraparound_casts_are_executed_by_angr",
+            "test_internal_static_call_transfers_args_and_returns_to_caller",
+            "test_switch_shared_targets_negative_case_and_default",
+            "test_loop_step_budget_keeps_active_state",
+            "test_external_call_loaded_but_never_given_an_unconstrained_return",
+            "test_unknown_direct_address_cannot_use_stock_unconstrained_fallback",
+            "test_unsupported_callee_is_rejected_transitively",
+            "test_unsupported_operand_shapes_do_not_claim_execution_readiness",
+            "test_exception_metadata_survives_loading_and_blocks_execution",
+            "test_bad_arguments_and_entry_keys_are_explicit_errors",
+            "test_multiple_methods_do_not_choose_an_arbitrary_entry",
+            "test_receiver_is_explicit_and_base_state_is_copied",
+            "test_interpreter_errors_are_recorded_not_skipped",
+            "test_actual_cap_pipeline_loads_all_methods_and_exports_source_map"
+          ]
+        }
+      ],
+      "sha256": "ceee28975e82292ca35ed4008ba20fb6dc3f8add0a731a18188febb4f5290e87"
+    },
+    {
+      "path": "cap_decompile/__init__.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cap_decompile/components/applet.py",
+      "lines": 79,
+      "definitions": [
+        {
+          "class": "AppletInfo",
+          "methods": []
+        },
+        {
+          "class": "AppletComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "b34e0fbe2ca573763ca98be508ce2eb1d6d67008fbf980a272e4d0367df9bda3"
+    },
+    {
+      "path": "cap_decompile/components/base.py",
+      "lines": 13,
+      "definitions": [
+        {
+          "class": "CAPComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "43add7bbfe034977f11e05ca73c25a9c575ceb61fb09508eb45e2ac0a26d6998"
+    },
+    {
+      "path": "cap_decompile/components/binary_reader.py",
+      "lines": 43,
+      "definitions": [
+        {
+          "class": "BinaryReader",
+          "methods": [
+            "__init__",
+            "read_u1",
+            "read_u2",
+            "read_u4",
+            "read_bytes",
+            "remaining",
+            "tell",
+            "seek",
+            "skip"
+          ]
+        }
+      ],
+      "sha256": "1d22c53bf5a58d35f2d86c795edebe0be191a1519ac23bdebaae5f0275bf50dc"
+    },
+    {
+      "path": "cap_decompile/components/class_component.py",
+      "lines": 286,
+      "definitions": [
+        {
+          "class": "ClassRef",
+          "methods": []
+        },
+        {
+          "function": "parse_class_ref"
+        },
+        {
+          "class": "TypeDescriptor",
+          "methods": []
+        },
+        {
+          "function": "parse_type_descriptor"
+        },
+        {
+          "class": "InterfaceInfo",
+          "methods": []
+        },
+        {
+          "function": "parse_interface_info"
+        },
+        {
+          "class": "ImplementedInterfaceInfo",
+          "methods": []
+        },
+        {
+          "function": "parse_implemented_interface"
+        },
+        {
+          "class": "RemoteMethodInfo",
+          "methods": []
+        },
+        {
+          "class": "RemoteInterfaceInfo",
+          "methods": []
+        },
+        {
+          "function": "parse_remote_interface_info"
+        },
+        {
+          "class": "ClassInfo",
+          "methods": []
+        },
+        {
+          "function": "parse_class_info"
+        },
+        {
+          "class": "ClassComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "d3f22822d4375750029b809c83656dcd4da45badd03b5432763d8ab02997bf13"
+    },
+    {
+      "path": "cap_decompile/components/constant_pool.py",
+      "lines": 201,
+      "definitions": [
+        {
+          "class": "CPInfo",
+          "methods": []
+        },
+        {
+          "class": "ConstantClassref",
+          "methods": []
+        },
+        {
+          "function": "parse_classref"
+        },
+        {
+          "class": "ConstantFieldOrMethodRef",
+          "methods": []
+        },
+        {
+          "function": "parse_field_or_method"
+        },
+        {
+          "class": "ConstantStaticRef",
+          "methods": []
+        },
+        {
+          "function": "parse_static_ref"
+        },
+        {
+          "class": "ConstantPoolComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "4b1a3316fab3b92c4a939765f4f0f615af7212a297f134d3959d000beb51c6a5"
+    },
+    {
+      "path": "cap_decompile/components/descriptor.py",
+      "lines": 229,
+      "definitions": [
+        {
+          "class": "FieldRef",
+          "methods": []
+        },
+        {
+          "class": "FieldDescriptorInfo",
+          "methods": []
+        },
+        {
+          "class": "MethodDescriptorInfo",
+          "methods": []
+        },
+        {
+          "class": "ClassDescriptorInfo",
+          "methods": []
+        },
+        {
+          "class": "TypeDescriptorInfo",
+          "methods": []
+        },
+        {
+          "class": "DescriptorComponent",
+          "methods": [
+            "parse_from_bytes",
+            "_parse_class_descriptor",
+            "_parse_field_descriptor",
+            "_parse_method_descriptor",
+            "_parse_type_descriptor"
+          ]
+        }
+      ],
+      "sha256": "74cf13ce7c59f67a505f26fcdf994b0c3734bea9837d76a460d803cb84c103c8"
+    },
+    {
+      "path": "cap_decompile/components/directory.py",
+      "lines": 134,
+      "definitions": [
+        {
+          "class": "StaticFieldSizeInfo",
+          "methods": []
+        },
+        {
+          "class": "CustomComponentInfo",
+          "methods": []
+        },
+        {
+          "class": "DirectoryComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "4fe697dd1f72d4c08638b736530beec88050bc65226a2b88ff1f40745dc2cb19"
+    },
+    {
+      "path": "cap_decompile/components/header.py",
+      "lines": 144,
+      "definitions": [
+        {
+          "class": "CAPVersion",
+          "methods": [
+            "major",
+            "minor",
+            "from_numbers"
+          ]
+        },
+        {
+          "class": "PackageInfo",
+          "methods": []
+        },
+        {
+          "class": "HeaderComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "de81fd5be28683fabe49a1250025eb31c68e286df6d81c36b4e8c8b41210fb44"
+    },
+    {
+      "path": "cap_decompile/components/import_component.py",
+      "lines": 83,
+      "definitions": [
+        {
+          "class": "PackageInfo",
+          "methods": []
+        },
+        {
+          "class": "ImportComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "3a8fbb911c0f369039c1b5d9c529b0b926c76a3bae19863b67983e157923a2ff"
+    },
+    {
+      "path": "cap_decompile/components/method_component.py",
+      "lines": 219,
+      "definitions": [
+        {
+          "class": "ExceptionHandlerInfo",
+          "methods": []
+        },
+        {
+          "class": "MethodHeaderInfo",
+          "methods": []
+        },
+        {
+          "class": "ExtendedMethodHeaderInfo",
+          "methods": []
+        },
+        {
+          "class": "MethodInfo",
+          "methods": []
+        },
+        {
+          "class": "MethodComponent",
+          "methods": [
+            "parse_from_bytes",
+            "link_with_descriptor",
+            "_parse_method_header"
+          ]
+        }
+      ],
+      "sha256": "b20d2f8e1f740f4e36f57957d0738356f33bc6ffebba7dc925ef469c6c5570dd"
+    },
+    {
+      "path": "cap_decompile/components/reference_location.py",
+      "lines": 108,
+      "definitions": [
+        {
+          "class": "ReferenceLocationComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "e7bfbed2097c08a7de2ecfe186da341291ccf536e2758795d37f974388422aca"
+    },
+    {
+      "path": "cap_decompile/components/static_field.py",
+      "lines": 175,
+      "definitions": [
+        {
+          "class": "ArrayInitInfo",
+          "methods": [
+            "element_size",
+            "element_count"
+          ]
+        },
+        {
+          "class": "StaticFieldComponent",
+          "methods": [
+            "parse_from_bytes"
+          ]
+        }
+      ],
+      "sha256": "981d1bb732bd155ec09672840ad437f0cbbcfe1334d4a6c83fc7b95b9d9bf242"
+    },
+    {
+      "path": "cap_decompile/container/cap_container.py",
+      "lines": 63,
+      "definitions": [
+        {
+          "class": "CAPContainer",
+          "methods": [
+            "__init__",
+            "load",
+            "_validate",
+            "get_component",
+            "list_components",
+            "print_component",
+            "print_components"
+          ]
+        }
+      ],
+      "sha256": "0f7396f49f7c0e61747c3619436a0faee3cfe4a99f8bfe381ff1d944b9154464"
+    },
+    {
+      "path": "cap_decompile/container/zip_reader.py",
+      "lines": 24,
+      "definitions": [
+        {
+          "class": "ZipReader",
+          "methods": [
+            "__init__",
+            "list_files",
+            "read_file",
+            "read_all"
+          ]
+        }
+      ],
+      "sha256": "6bd5cdd21ee889f90ff37feed1f0ff2df1f8be6372bf72d3e4244444f5c6620c"
+    },
+    {
+      "path": "cap_decompile/main.py",
+      "lines": 41,
+      "definitions": [
+        {
+          "function": "main"
+        }
+      ],
+      "sha256": "3567d36f2ae65990c4c57120a2f41d5bad65ba7a8a5a8bf47d7e51945417b415"
+    },
+    {
+      "path": "cap_decompile/model/cap_file.py",
+      "lines": 144,
+      "definitions": [
+        {
+          "class": "CAPFile",
+          "methods": [
+            "validate",
+            "link",
+            "to_model"
+          ]
+        },
+        {
+          "class": "CAPFileBuilder",
+          "methods": [
+            "build"
+          ]
+        }
+      ],
+      "sha256": "60b18ad474e41e98e26405a83938f0ffafe38f1019382c6f3dbd2375de9f3422"
+    },
+    {
+      "path": "cap_decompile/model/constant_pool_entries.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cap_decompile/model/method_info.py",
+      "lines": 861,
+      "definitions": [
+        {
+          "class": "Instruction",
+          "methods": []
+        },
+        {
+          "class": "ExceptionHandler",
+          "methods": []
+        },
+        {
+          "class": "Method",
+          "methods": []
+        },
+        {
+          "function": "read_u1"
+        },
+        {
+          "function": "read_s1"
+        },
+        {
+          "function": "read_u2"
+        },
+        {
+          "function": "read_s2"
+        },
+        {
+          "function": "read_u4"
+        },
+        {
+          "function": "read_s4"
+        },
+        {
+          "function": "parse_stableswitch"
+        },
+        {
+          "function": "parse_itableswitch"
+        },
+        {
+          "function": "parse_slookupswitch"
+        },
+        {
+          "function": "parse_ilookupswitch"
+        },
+        {
+          "function": "parse_bytecode"
+        }
+      ],
+      "sha256": "5f600463190095ad3cf1e0a7ecb92bfbf37a4f5f7caed3ac8d299b5bd024f5c8"
+    },
+    {
+      "path": "cap_decompile/model/references.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cap_decompile/parser.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cap_decompile/validation/invariants.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cap_decompile/validation/validator.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cfg_generator/__init__.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cfg_generator/analysis/block_splitter.py",
+      "lines": 89,
+      "definitions": [
+        {
+          "function": "split_basic_blocks"
+        },
+        {
+          "function": "_build_block"
+        }
+      ],
+      "sha256": "307dcbb2b430122d23492cb476cc5f4fe85bafa97e1c8f08015b6b521f3da161"
+    },
+    {
+      "path": "cfg_generator/analysis/edge_builder.py",
+      "lines": 163,
+      "definitions": [
+        {
+          "function": "build_edges"
+        },
+        {
+          "function": "_add_edge"
+        }
+      ],
+      "sha256": "d16f2f821b9f8db999d44ecd0e253303875c42bd3608816bb8e7cb98fe01a4a6"
+    },
+    {
+      "path": "cfg_generator/analysis/exception_edges.py",
+      "lines": 39,
+      "definitions": [
+        {
+          "function": "build_exception_edges"
+        }
+      ],
+      "sha256": "81428a85ad5bd2ef098034cf9a782b4abdfeee3f25f8014612329ac1b984e79d"
+    },
+    {
+      "path": "cfg_generator/analysis/leaders.py",
+      "lines": 57,
+      "definitions": [
+        {
+          "function": "find_leaders"
+        }
+      ],
+      "sha256": "870cf96a8f415aa18a2160d5404009ed3a780a60e749829c70cbd2ecd28fe81f"
+    },
+    {
+      "path": "cfg_generator/builder.py",
+      "lines": 46,
+      "definitions": [
+        {
+          "function": "build_cfg"
+        }
+      ],
+      "sha256": "bbfd7ffe8ee6a27201dc12cee2876749f4c8a03211c7ace95d47f280e1128cf2"
+    },
+    {
+      "path": "cfg_generator/exporter.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cfg_generator/generator.py",
+      "lines": 6,
+      "definitions": [
+        {
+          "class": "CFGGenerator",
+          "methods": [
+            "build"
+          ]
+        }
+      ],
+      "sha256": "25bf6d0a313a6008cc0827137224e971222a0ab2797286361d8e31708cc0c475"
+    },
+    {
+      "path": "cfg_generator/model/basic_block.py",
+      "lines": 21,
+      "definitions": [
+        {
+          "class": "BasicBlock",
+          "methods": []
+        }
+      ],
+      "sha256": "95c269b94887421fe19ba0a3a297de67a4c60a791cd41388542b5ce287209126"
+    },
+    {
+      "path": "cfg_generator/model/cfg.py",
+      "lines": 17,
+      "definitions": [
+        {
+          "class": "CFG",
+          "methods": []
+        }
+      ],
+      "sha256": "7ede3d77449dae000e19eecf9a7284c0d041e40863a33d2abcfd2a951e343b2b"
+    },
+    {
+      "path": "cfg_generator/model/edge.py",
+      "lines": 20,
+      "definitions": [
+        {
+          "class": "EdgeType",
+          "methods": []
+        },
+        {
+          "class": "CFGEdge",
+          "methods": []
+        }
+      ],
+      "sha256": "9672fb88f03688fa87ce9f30ac14526a52b4356cbf64e9247b7c096248869fea"
+    },
+    {
+      "path": "cfg_generator/utils/instruction_utils.py",
+      "lines": 81,
+      "definitions": [
+        {
+          "function": "is_conditional_branch"
+        },
+        {
+          "function": "is_unconditional_branch"
+        },
+        {
+          "function": "is_switch"
+        },
+        {
+          "function": "is_return"
+        },
+        {
+          "function": "is_terminator"
+        }
+      ],
+      "sha256": "278748083c9a53c467c5a09d254cc4b180367b983527096c756b71c902eacd6e"
+    },
+    {
+      "path": "cfg_generator/visualization/ascii_exporter.py",
+      "lines": 80,
+      "definitions": [
+        {
+          "class": "ASCIIExporter",
+          "methods": [
+            "export"
+          ]
+        }
+      ],
+      "sha256": "2a2f404afe195e87cb255003bac30777178f774ee19ed59d6286a912c82830bc"
+    },
+    {
+      "path": "cfg_generator/visualization/dot_exporter.py",
+      "lines": 104,
+      "definitions": [
+        {
+          "class": "DotExporter",
+          "methods": [
+            "export"
+          ]
+        }
+      ],
+      "sha256": "4563f60a20edeb031a7addf4c0e663c5278e1e2cb7a4bfdf39669a497cf4b4d6"
+    },
+    {
+      "path": "integration_tests/test_name1.py",
+      "lines": 188,
+      "definitions": [
+        {
+          "function": "component"
+        },
+        {
+          "class": "Name1Tests",
+          "methods": [
+            "setUpClass",
+            "test_cap22_components_and_real_aids",
+            "test_decoded_instruction_sequences_match_compiler_jca",
+            "test_pysoot_retains_interface_call_and_cap_offsets",
+            "test_angr_load_does_not_claim_applet_is_executable",
+            "test_uninitialized_two_key_field_is_preserved",
+            "test_missing_or_wrong_interface_binding_is_rejected",
+            "test_interface_word_count_and_binding_validation",
+            "test_cap21_pipeline_regression"
+          ]
+        },
+        {
+          "class": "BinaryBoundaryTests",
+          "methods": [
+            "test_operand_widths_and_unsigned_indices",
+            "test_truncated_fixed_width_instructions_rejected",
+            "test_array_checkcast_and_invalid_atype",
+            "test_header_name_boundary_and_size_validation",
+            "test_directory_counts_for_both_formats_and_custom_component",
+            "test_class_signature_pool_boundary"
+          ]
+        }
+      ],
+      "sha256": "dbdc756d3c64d5a687b6d2a4524901bd9d289659b469f442fce46e27f94a23a1"
+    },
+    {
+      "path": "jcvm_ir/__init__.py",
+      "lines": 10,
+      "definitions": [],
+      "sha256": "c5c81ae109bba8085c60f2ee37def51deb611212a2c7eb1ce24ee9e59282578b"
+    },
+    {
+      "path": "jcvm_ir/adapter.py",
+      "lines": 69,
+      "definitions": [
+        {
+          "class": "MethodInput",
+          "methods": []
+        },
+        {
+          "function": "methods_from_cap"
+        }
+      ],
+      "sha256": "d9862f7596e94a819451601f21e065a795e9e50b2e281281bd86c013d412066b"
+    },
+    {
+      "path": "jcvm_ir/builder.py",
+      "lines": 148,
+      "definitions": [
+        {
+          "class": "IRBuilder",
+          "methods": [
+            "__init__",
+            "build",
+            "_check_cfg",
+            "_verify_stacks"
+          ]
+        }
+      ],
+      "sha256": "6a95239832a34353ec36c658be6b8fa8647d992d30de44ffc775c80e4fd1e2a3"
+    },
+    {
+      "path": "jcvm_ir/lowering.py",
+      "lines": 158,
+      "definitions": [
+        {
+          "function": "lower"
+        }
+      ],
+      "sha256": "bdbf1d82f3411c89877ded9068543e749428f6d084956fa9f6d3192919b421c6"
+    },
+    {
+      "path": "jcvm_ir/model.py",
+      "lines": 153,
+      "definitions": [
+        {
+          "class": "IRValidationError",
+          "methods": []
+        },
+        {
+          "class": "Type",
+          "methods": [
+            "stack_kind",
+            "slots"
+          ]
+        },
+        {
+          "class": "Signature",
+          "methods": []
+        },
+        {
+          "class": "Reference",
+          "methods": []
+        },
+        {
+          "class": "Op",
+          "methods": []
+        },
+        {
+          "class": "Operation",
+          "methods": []
+        },
+        {
+          "class": "Handler",
+          "methods": []
+        },
+        {
+          "class": "Edge",
+          "methods": []
+        },
+        {
+          "class": "Block",
+          "methods": []
+        },
+        {
+          "class": "MethodIR",
+          "methods": [
+            "to_json",
+            "to_text"
+          ]
+        }
+      ],
+      "sha256": "832fe1bc47f485f26b3efe8e35ef0737abf6a1beb982ddb53817d81cca707406"
+    },
+    {
+      "path": "jcvm_ir/resolver.py",
+      "lines": 145,
+      "definitions": [
+        {
+          "class": "DescriptorTypes",
+          "methods": [
+            "__init__",
+            "get",
+            "signature"
+          ]
+        },
+        {
+          "class": "ReferenceResolver",
+          "methods": [
+            "__init__",
+            "resolve",
+            "class_type",
+            "resolve_interface"
+          ]
+        }
+      ],
+      "sha256": "e2ef027473cf15270364721d391b39f8e8d19fb19aa013c1a83da848e330fb56"
+    },
+    {
+      "path": "jvm_like_ir/__init__.py",
+      "lines": 7,
+      "definitions": [],
+      "sha256": "520bd601909b13b318b6889a1ee7daf3dd6a3ddc8c525f44624c23e60366cf04"
+    },
+    {
+      "path": "jvm_like_ir/__main__.py",
+      "lines": 32,
+      "definitions": [
+        {
+          "function": "main"
+        }
+      ],
+      "sha256": "895fe23375e84285b5273e37d8ac07419f6116064a3251f258db80f85ba84b66"
+    },
+    {
+      "path": "jvm_like_ir/builder.py",
+      "lines": 242,
+      "definitions": [
+        {
+          "class": "JVMLikeIRBuilder",
+          "methods": [
+            "build",
+            "_arguments",
+            "_block",
+            "_check_targets"
+          ]
+        }
+      ],
+      "sha256": "12547c4d55560e96136ab0cbebd444878ca3f1fcf301b47cdfeb352a890c5bdd"
+    },
+    {
+      "path": "jvm_like_ir/model.py",
+      "lines": 129,
+      "definitions": [
+        {
+          "class": "LoweringError",
+          "methods": []
+        },
+        {
+          "class": "ValueType",
+          "methods": [
+            "bits",
+            "slots",
+            "of"
+          ]
+        },
+        {
+          "class": "Value",
+          "methods": []
+        },
+        {
+          "class": "Constant",
+          "methods": []
+        },
+        {
+          "class": "Argument",
+          "methods": []
+        },
+        {
+          "class": "Statement",
+          "methods": []
+        },
+        {
+          "class": "Terminator",
+          "methods": []
+        },
+        {
+          "class": "Edge",
+          "methods": []
+        },
+        {
+          "class": "Block",
+          "methods": []
+        },
+        {
+          "class": "Method",
+          "methods": [
+            "to_json",
+            "to_text",
+            "validate"
+          ]
+        }
+      ],
+      "sha256": "b6076a79a97cf8b19672980bad6313a69cd1eb80d9e10683832711e0e8fe1088"
+    },
+    {
+      "path": "jvm_like_ir/text.py",
+      "lines": 72,
+      "definitions": [
+        {
+          "function": "operand"
+        },
+        {
+          "function": "reference"
+        },
+        {
+          "function": "format_statement"
+        },
+        {
+          "function": "format_method"
+        }
+      ],
+      "sha256": "321f831a7b0d81fcfa7ca720a07e2adef954dcfc1960c2009968b1e63b6ebd2b"
+    },
+    {
+      "path": "jvm_like_ir/validation.py",
+      "lines": 262,
+      "definitions": [
+        {
+          "function": "require"
+        },
+        {
+          "function": "validate"
+        },
+        {
+          "function": "_statement_types"
+        },
+        {
+          "function": "_store"
+        },
+        {
+          "function": "_validate_locals"
+        }
+      ],
+      "sha256": "71c772e550a335d897db30d642bf6a4c4e26275237659c1d25ce9aa2299a4681"
+    },
+    {
+      "path": "main.py",
+      "lines": 273,
+      "definitions": [
+        {
+          "function": "load_cap"
+        },
+        {
+          "function": "extract_methods"
+        },
+        {
+          "function": "build_cfgs"
+        },
+        {
+          "function": "verify_methods"
+        },
+        {
+          "function": "build_jcvm_ir"
+        },
+        {
+          "function": "build_jvm_like_ir"
+        },
+        {
+          "function": "load_symbols"
+        },
+        {
+          "function": "build_soot_ir"
+        },
+        {
+          "function": "build_pysoot_model"
+        },
+        {
+          "function": "load_angr_program"
+        },
+        {
+          "function": "export_ir_methods"
+        },
+        {
+          "function": "export_soot_ir"
+        },
+        {
+          "function": "export_cfgs"
+        },
+        {
+          "function": "print_debug_output"
+        },
+        {
+          "function": "parse_args"
+        },
+        {
+          "function": "main"
+        }
+      ],
+      "sha256": "57a219d4bcb2b84579db437a0fc5292fe635fe8191d5ba7a5c1dc899a0dfdec8"
+    },
+    {
+      "path": "pysoot_adapter/__init__.py",
+      "lines": 12,
+      "definitions": [],
+      "sha256": "162348b33956b922da64e2aa6419e399d6c5fafb13171675b7ff4156dd403aa6"
+    },
+    {
+      "path": "pysoot_adapter/backend.py",
+      "lines": 67,
+      "definitions": [
+        {
+          "function": "load_backend"
+        }
+      ],
+      "sha256": "349a56b07b2abf3788705bf3635f2414aecfc6f28443f2380d42414c2431d1cb"
+    },
+    {
+      "path": "pysoot_adapter/builder.py",
+      "lines": 278,
+      "definitions": [
+        {
+          "class": "PySootAdapter",
+          "methods": [
+            "build"
+          ]
+        },
+        {
+          "class": "_ProgramBuilder",
+          "methods": [
+            "__init__",
+            "error",
+            "method_ref",
+            "field_ref",
+            "value",
+            "statement",
+            "convert_method",
+            "build"
+          ]
+        }
+      ],
+      "sha256": "bb5be111d923dc7d82d0029d93b2df4fefd26b959e40d8ff2bb0b7aec0e6ae07"
+    },
+    {
+      "path": "pysoot_adapter/cap_metadata.py",
+      "lines": 143,
+      "definitions": [
+        {
+          "function": "_attrs"
+        },
+        {
+          "function": "metadata_from_cap"
+        }
+      ],
+      "sha256": "ac2950282e05ac80e3e09145e6375e3f77699cf46f5abefd2184fe9d5879d21f"
+    },
+    {
+      "path": "pysoot_adapter/errors.py",
+      "lines": 9,
+      "definitions": [
+        {
+          "class": "AdapterError",
+          "methods": []
+        },
+        {
+          "class": "DependencyError",
+          "methods": []
+        }
+      ],
+      "sha256": "46f175fc70ba30d21f8a834ca6a76140a278c2c305080c3e471447d4df04f364"
+    },
+    {
+      "path": "pysoot_adapter/metadata.py",
+      "lines": 53,
+      "definitions": [
+        {
+          "class": "FieldMetadata",
+          "methods": []
+        },
+        {
+          "class": "MethodMetadata",
+          "methods": []
+        },
+        {
+          "class": "ClassMetadata",
+          "methods": []
+        },
+        {
+          "class": "AppletMetadata",
+          "methods": []
+        },
+        {
+          "class": "ProgramMetadata",
+          "methods": []
+        }
+      ],
+      "sha256": "40f5a4d874a5adbf1bf1c8d0b9d1089f3627dd1d42d339b626f051c6f31ada3c"
+    },
+    {
+      "path": "pysoot_adapter/model.py",
+      "lines": 127,
+      "definitions": [
+        {
+          "class": "MethodDetails",
+          "methods": []
+        },
+        {
+          "function": "_node"
+        },
+        {
+          "class": "AdaptedProgram",
+          "methods": [
+            "required_backend_features",
+            "require_resolved_symbols",
+            "require_backend_features",
+            "method_to_dict",
+            "to_dict",
+            "to_json",
+            "method_to_text",
+            "export"
+          ]
+        }
+      ],
+      "sha256": "46851854e67ea6eb280de75a3110698f31851a2dd2057cd586f3a8132112b99a"
+    },
+    {
+      "path": "pysoot_adapter/tests/test_adapter.py",
+      "lines": 396,
+      "definitions": [
+        {
+          "function": "local"
+        },
+        {
+          "function": "constant"
+        },
+        {
+          "function": "body"
+        },
+        {
+          "function": "declarations"
+        },
+        {
+          "function": "adapt"
+        },
+        {
+          "function": "run_numeric"
+        },
+        {
+          "class": "AdapterTests",
+          "methods": [
+            "test_real_nodes_branch_targets_are_unit_labels_not_block_indices",
+            "test_short_wraparound_preserved_by_cast_sequence",
+            "test_switch_shared_targets_and_default",
+            "test_constructor_calls_and_definition_are_renamed_together",
+            "test_internal_virtual_alias_resolves_to_declared_method",
+            "test_fields_use_name_then_owner_and_reuse_receiver_local",
+            "test_exception_edges_order_and_traps_are_not_declared_throws",
+            "test_external_calls_remain_explicit_obligations",
+            "test_bad_parameter_and_unknown_schema_rejected",
+            "test_missing_class_or_method_metadata_fails",
+            "test_static_field_null_unary_and_array_nodes",
+            "test_abstract_interface_and_interface_call",
+            "test_throw_is_preserved_with_backend_requirement",
+            "test_backend_import_does_not_start_jvm"
+          ]
+        },
+        {
+          "class": "CAPIntegrationTests",
+          "methods": [
+            "setUpClass",
+            "test_all_nine_methods_preserve_instructions_edges_and_offsets",
+            "test_constructor_access_flags_and_field_declarations",
+            "test_metadata_requires_offsets_and_matching_imports",
+            "test_class_offsets_are_info_relative_and_join_is_not_positional",
+            "test_diagnostics_export_is_deterministic_and_has_source_mapping"
+          ]
+        }
+      ],
+      "sha256": "181a787b905286c5c8533c4f41ff09d8d5b5606bed69e5f8a070b9cd76a50d10"
+    },
+    {
+      "path": "soot_ir/__init__.py",
+      "lines": 6,
+      "definitions": [],
+      "sha256": "b3f64621840400b1726affd2d068a90c37bf67e51a738d3efc9f0b44fdf906db"
+    },
+    {
+      "path": "soot_ir/__main__.py",
+      "lines": 37,
+      "definitions": [
+        {
+          "function": "main"
+        }
+      ],
+      "sha256": "1a3f4c43de2d087dd66698224a4d14d0e94ba5a14f284079910d44b4f622a6f1"
+    },
+    {
+      "path": "soot_ir/builder.py",
+      "lines": 499,
+      "definitions": [
+        {
+          "class": "SootIRBuilder",
+          "methods": [
+            "__init__",
+            "build",
+            "build_program"
+          ]
+        },
+        {
+          "class": "_MethodBuilder",
+          "methods": [
+            "__init__",
+            "error",
+            "mark",
+            "fresh",
+            "fresh_mark",
+            "local",
+            "constant",
+            "emit",
+            "assign",
+            "cast",
+            "int_value",
+            "narrow",
+            "declared",
+            "slot",
+            "operand",
+            "result",
+            "finish_numeric",
+            "check_arity",
+            "lower_statement",
+            "prepare_parameters",
+            "prepare_edges",
+            "normal_edges",
+            "lower_terminator",
+            "prologue",
+            "collect_traps",
+            "edge_bridges",
+            "exception_bridges",
+            "build"
+          ]
+        },
+        {
+          "function": "backend_features"
+        },
+        {
+          "function": "make_blocks"
+        }
+      ],
+      "sha256": "9355c04c0849db4857a6e2b264fde990cf2537425ea78918efa82d9478d8fb53"
+    },
+    {
+      "path": "soot_ir/input.py",
+      "lines": 71,
+      "definitions": [
+        {
+          "class": "LoweringError",
+          "methods": []
+        },
+        {
+          "function": "plain"
+        },
+        {
+          "function": "read_method"
+        },
+        {
+          "function": "kind"
+        },
+        {
+          "function": "stack_kind"
+        },
+        {
+          "function": "op_name"
+        },
+        {
+          "function": "terminator_kind"
+        }
+      ],
+      "sha256": "c80bc3369567f6271770c0d41b6692805a356c5f3922c6e175fec55b2bfe08cf"
+    },
+    {
+      "path": "soot_ir/model.py",
+      "lines": 133,
+      "definitions": [
+        {
+          "class": "Local",
+          "methods": []
+        },
+        {
+          "class": "Value",
+          "methods": []
+        },
+        {
+          "class": "MethodRef",
+          "methods": [
+            "signature"
+          ]
+        },
+        {
+          "class": "FieldRef",
+          "methods": [
+            "signature"
+          ]
+        },
+        {
+          "class": "Expr",
+          "methods": []
+        },
+        {
+          "class": "Unit",
+          "methods": []
+        },
+        {
+          "class": "Block",
+          "methods": []
+        },
+        {
+          "class": "Trap",
+          "methods": []
+        },
+        {
+          "class": "Method",
+          "methods": [
+            "to_json",
+            "to_text",
+            "validate"
+          ]
+        },
+        {
+          "class": "Program",
+          "methods": [
+            "to_json",
+            "require_resolved_symbols"
+          ]
+        }
+      ],
+      "sha256": "dae2f444338a31b74e83cbea5d690364a6807f3cf98e85f2979fff425781309d"
+    },
+    {
+      "path": "soot_ir/reference_types.py",
+      "lines": 64,
+      "definitions": [
+        {
+          "function": "infer_reference_types"
+        }
+      ],
+      "sha256": "0da87070e851bd62d59cb9fcf138deec1214c1cecc9e28ac02c2d20e0faac2e6"
+    },
+    {
+      "path": "soot_ir/source_validation.py",
+      "lines": 185,
+      "definitions": [
+        {
+          "function": "validate_source"
+        }
+      ],
+      "sha256": "33087a2b8ccaad1157540179e7df5f1ce6c06adfa495ecfe0bd051519a47ae5f"
+    },
+    {
+      "path": "soot_ir/symbols.py",
+      "lines": 159,
+      "definitions": [
+        {
+          "function": "package_key"
+        },
+        {
+          "function": "reference_key"
+        },
+        {
+          "class": "SymbolTable",
+          "methods": [
+            "__post_init__",
+            "from_dict",
+            "class_name",
+            "reference_class",
+            "type_name",
+            "register",
+            "method_ref",
+            "field_ref",
+            "catch_type"
+          ]
+        }
+      ],
+      "sha256": "64046dbfdd0a5a1c2172d0e934605b8d3072969e05ae939563cbf5b58808bcf8"
+    },
+    {
+      "path": "soot_ir/text.py",
+      "lines": 77,
+      "definitions": [
+        {
+          "function": "render"
+        },
+        {
+          "function": "method_text"
+        }
+      ],
+      "sha256": "389dcb5323065838e5ff434d8636300a09efec0b8a4f1f6cb25272d782d6ebdb"
+    },
+    {
+      "path": "soot_ir/validation.py",
+      "lines": 170,
+      "definitions": [
+        {
+          "function": "validate"
+        }
+      ],
+      "sha256": "db0f8aedbf6fda40c2eebe8a6bd11c0a5ca51d0af764c15d3a4cbd9a9e72a6a4"
+    },
+    {
+      "path": "verification_engine/engine/rule_base.py",
+      "lines": 18,
+      "definitions": [
+        {
+          "class": "Rule",
+          "methods": [
+            "__init__",
+            "check"
+          ]
+        }
+      ],
+      "sha256": "59370593ce0c53a9e44e7f8fa1daa5173f9cc87e4d2017e325468d3f8d70a261"
+    },
+    {
+      "path": "verification_engine/engine/rule_context.py",
+      "lines": 11,
+      "definitions": [
+        {
+          "class": "RuleContext",
+          "methods": []
+        }
+      ],
+      "sha256": "d05f61961f8dd661d63bea9099c47005a3fb8b4bca8b90430c5f488cc318306f"
+    },
+    {
+      "path": "verification_engine/engine/rule_engine.py",
+      "lines": 46,
+      "definitions": [
+        {
+          "class": "RuleEngine",
+          "methods": [
+            "__init__",
+            "run",
+            "_build_context"
+          ]
+        }
+      ],
+      "sha256": "b4d1039530f7468e43e85a7a19bad406d03a6f5f5c31aaf5282d2a29fad5e4c3"
+    },
+    {
+      "path": "verification_engine/model/verification_error.py",
+      "lines": 69,
+      "definitions": [
+        {
+          "class": "VerificationError",
+          "methods": [
+            "__str__"
+          ]
+        }
+      ],
+      "sha256": "ef314c91515d7de32d54d299226fdde51814eb2d7d40a374bd3ab9b7e60f421b"
+    },
+    {
+      "path": "verification_engine/model/verification_report.py",
+      "lines": 110,
+      "definitions": [
+        {
+          "class": "VerificationReport",
+          "methods": [
+            "add_error",
+            "extend",
+            "merge",
+            "has_errors",
+            "summary",
+            "to_text",
+            "__str__"
+          ]
+        }
+      ],
+      "sha256": "fdeb8335c5c289bf7ce841c6d82227a9b8461710ece2c7d2e372bc1b24c977f4"
+    },
+    {
+      "path": "verification_engine/rules/block/empty_block_rule.py",
+      "lines": 26,
+      "definitions": [
+        {
+          "class": "EmptyBlockRule",
+          "methods": [
+            "check"
+          ]
+        }
+      ],
+      "sha256": "48a282ef59c7cca512ab85d149df08188da4ef9578c75ba3ce6b31ab955ffc5a"
+    },
+    {
+      "path": "verification_engine/rules/block/overlap_rule.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification_engine/rules/block/range_rule.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification_engine/rules/consistency/predecessor_rule.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification_engine/rules/consistency/successor_rule.py",
+      "lines": 32,
+      "definitions": [
+        {
+          "class": "SuccessorConsistencyRule",
+          "methods": [
+            "check"
+          ]
+        }
+      ],
+      "sha256": "847ae1a6406ed3e00accbdca793b03701855f51fc267edf9711f9a188779847e"
+    },
+    {
+      "path": "verification_engine/rules/edge/conditional_rule.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification_engine/rules/edge/edge_target_rule.py",
+      "lines": 35,
+      "definitions": [
+        {
+          "class": "EdgeTargetRule",
+          "methods": [
+            "check"
+          ]
+        }
+      ],
+      "sha256": "d4af2aab4ecf1264e0e0bedc115c8853b31a9fdf2a85a25ec6c1973ffab299d3"
+    },
+    {
+      "path": "verification_engine/rules/edge/exit_rule.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification_engine/rules/graph/entry_rule.py",
+      "lines": 0,
+      "definitions": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification_engine/rules/graph/reachability_rule.py",
+      "lines": 47,
+      "definitions": [
+        {
+          "class": "ReachabilityRule",
+          "methods": [
+            "check"
+          ]
+        }
+      ],
+      "sha256": "3c09b5ccdbc43c4b1efa5834199d7c62e29e060c8126f9a823f544adcf0c7048"
+    },
+    {
+      "path": "verification_engine/verifier.py",
+      "lines": 29,
+      "definitions": [
+        {
+          "class": "Verifier",
+          "methods": [
+            "__init__",
+            "verify",
+            "_build_cfg"
+          ]
+        }
+      ],
+      "sha256": "174878ce97d55c2830599bead8e15b58dc61b892d60a2447a7d5134e0e41dc30"
+    }
+  ],
+  "basis": "Working copy after bot1_javacard_execution_update.zip; base commit plus cumulative changes"
+}

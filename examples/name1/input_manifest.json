@@ -1,0 +1,77 @@
+{
+  "source": "User-supplied files, 2026-10-28; native sources are reference inputs, not linked runtime models.",
+  "files": {
+    "eos_util.c": {
+      "bytes": 46232,
+      "sha256": "c481793f9deb86e8589ffafe2f177e62cec6d6d696c9523de06ce7b4ca4e674b"
+    },
+    "file_infos": {
+      "bytes": 286,
+      "sha256": "50f436fc2fb87d7e0eaf0f4c881a7114ff4e521b1ce24a4c3737d9fe0b403ae9"
+    },
+    "jc_crypto.c": {
+      "bytes": 14611,
+      "sha256": "e6698c1f9263f47e7e2b10dc7ff5cc16b00424cbbe93618fc535e6363c7d24b2"
+    },
+    "jc_framework.c": {
+      "bytes": 18431,
+      "sha256": "e2065a8212c52c9e75fd874ae03e4c9975842d0c3d10b3abccb6a4e7c96d9e79"
+    },
+    "jc_framework_apdu.c": {
+      "bytes": 8489,
+      "sha256": "bf4271499d37bf59014806c8576029c036cab435fa0c336d1246f0a803cc37fe"
+    },
+    "jc_framework_apdu22.c": {
+      "bytes": 7392,
+      "sha256": "37130c66ae41dea352f23e7a37b68a0344a949514dbdd1f4aa4c070c154690bb"
+    },
+    "jc_framework_apdu30.c": {
+      "bytes": 1608,
+      "sha256": "34fc5536a27b4951eb1daf1c5984738634511c1cfe7b9a4d89a533cb2120ccb8"
+    },
+    "jc_framework_service.c": {
+      "bytes": 35455,
+      "sha256": "3963a9a5eb54356e32749c1ad567fc4b259e75c9b46e124b6d006d3848aac16f"
+    },
+    "jc_framework_sys.c": {
+      "bytes": 13892,
+      "sha256": "62310016f185d0b03b49a5e6e1aa121b45d680271ba8add99eb7e5ba654f28f9"
+    },
+    "jc_framework_sys22.c": {
+      "bytes": 3764,
+      "sha256": "42195819c385f524b08815559721ecf6b710375eaed6b3f593953f664f8eedbc"
+    },
+    "jc_framework_sys30.c": {
+      "bytes": 3645,
+      "sha256": "d73365b67b5986d9acef6618acbc71ed902f78c234c7a1dd4b4bec5919fb2d75"
+    },
+    "jc_framework_util.c": {
+      "bytes": 16451,
+      "sha256": "02f18c7046fb819b03f411ba14f681defad034b453a868aeca3d3477cb5551fa"
+    },
+    "jc_math.c": {
+      "bytes": 27883,
+      "sha256": "ca31fb963b4cbce975d7ccc2fc8a812605d298805bfa52dcd82bac38d2fe9780"
+    },
+    "jc_security.c": {
+      "bytes": 55602,
+      "sha256": "e98930f7327a2a0d6e13b2bd9bf5a7a0949426db6be5d2fa87b9cdb83960a49b"
+    },
+    "name1.cap": {
+      "bytes": 4344,
+      "sha256": "edd4d74faea6ff1e37309bb0e6bf2bb35e94d97061c1f99c80f9766765941b65"
+    },
+    "name1.exp": {
+      "bytes": 32,
+      "sha256": "523445e1cec0b3043afe91dce6b532f73f3ba218da0ebfb0cc3bb47bb7758df1"
+    },
+    "name1.java": {
+      "bytes": 5915,
+      "sha256": "292277bfdb68a7f8b9558f06b598825793e44372b6611c8f5ed58866ed941a7a"
+    },
+    "name1.jca": {
+      "bytes": 10762,
+      "sha256": "520b582bb305ee1f275c67e89be36fd5c07c250ff156e21192e1578aad1d11f3"
+    }
+  }
+}

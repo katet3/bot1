@@ -276,11 +276,10 @@ class LoaderTests(unittest.TestCase):
     def test_receiver_is_explicit_and_base_state_is_copied(self):
         method = body([Unit(0, "return", 0, 0, right=const(4))], static=False)
         loaded = AngrLoader().load(adapt(method))
-        from angr.engines.soot.values import SimSootValue_ThisRef
         with self.assertRaisesRegex(LoaderError, "receiver"):
             loaded.create_call_state()
-        base = loaded.project.factory.blank_state(addr=loaded.method_address("entry"))
-        receiver = SimSootValue_ThisRef("test-object", OWNER)
+        base = loaded.create_heap_state()
+        receiver = base.cap_heap.new_object(OWNER)
         state = loaded.create_call_state(receiver=receiver, base_state=base)
         self.assertIsNot(state, base)
         self.assertEqual(self.returns(self.execute(loaded, state)), [4])

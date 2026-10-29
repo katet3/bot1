@@ -61,6 +61,10 @@ class DirectoryComponent(CAPComponent):
 
     @classmethod
     def parse_from_bytes(cls, data: bytes, cap_version: CAPVersion):
+        # Debug.cap (component 12) was introduced with CAP 2.2.
+        component_count = 11 if cap_version == CAPVersion.V21 else 12
+        if len(data) < 3 + 2 * component_count + 9:
+            raise ValueError("Truncated Directory component")
         reader = BinaryReader(data)
 
         tag = reader.read_u1()
@@ -68,9 +72,11 @@ class DirectoryComponent(CAPComponent):
             raise ValueError(f"Invalid Directory tag. Tag is {tag}")
 
         size = reader.read_u2()
+        if size != len(data) - 3:
+            raise ValueError("Directory component size mismatch")
         start_remaining = reader.remaining()
 
-        component_sizes = [reader.read_u2() for _ in range(12)]
+        component_sizes = [reader.read_u2() for _ in range(component_count)]
 
         # static_field_size_info
         image_size = reader.read_u2()
@@ -85,30 +91,30 @@ class DirectoryComponent(CAPComponent):
 
         import_count = reader.read_u1()
 
-        #todo other cap_version
-        if cap_version in (CAPVersion.V22, CAPVersion.V21):
-            applet_count = 0
-            custom_count = 0
-            custom_components = None
-        else:
-            applet_count = reader.read_u1()
-            custom_count = reader.read_u1()
+        applet_count = reader.read_u1()
+        custom_count = reader.read_u1()
+        if custom_count > 127:
+            raise ValueError("Invalid custom component count")
+        custom_components = []
 
-            custom_components = []
-
-            for _ in range(custom_count):
-                component_tag = reader.read_u1()
-                size = reader.read_u2()
-                aid_length = reader.read_u1()
-                aid = reader.read_bytes(aid_length)
-
-                custom_components.append(
-                    CustomComponentInfo(
-                        component_tag=component_tag,
-                        size=size,
-                        aid=aid
-                    )
+        for _ in range(custom_count):
+            if reader.remaining() < 4:
+                raise ValueError("Truncated custom component descriptor")
+            component_tag = reader.read_u1()
+            component_size = reader.read_u2()
+            aid_length = reader.read_u1()
+            if component_tag < 128 or not 5 <= aid_length <= 16:
+                raise ValueError("Invalid custom component tag or AID length")
+            if reader.remaining() < aid_length:
+                raise ValueError("Truncated custom component AID")
+            aid = reader.read_bytes(aid_length)
+            custom_components.append(
+                CustomComponentInfo(
+                    component_tag=component_tag,
+                    size=component_size,
+                    aid=aid
                 )
+            )
 
         if reader.remaining() != 0:
             raise ValueError("Directory parsing incomplete")

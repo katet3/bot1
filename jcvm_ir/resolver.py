@@ -1,4 +1,5 @@
 """Resolve CAP symbolic identities and Descriptor signatures, without API name guesses."""
+from dataclasses import replace
 from .model import Type, Signature, Reference, IRValidationError
 
 
@@ -54,8 +55,9 @@ class DescriptorTypes:
 
 
 class ReferenceResolver:
-    def __init__(self, cap_file):
+    def __init__(self, cap_file, interface_signatures=None):
         self.cap = cap_file
+        self.interface_signatures = dict(interface_signatures or {})
         self.types = DescriptorTypes(cap_file.descriptor)
         if len(self.types.offsets) != len(cap_file.constant_pool.constant_pool):
             raise IRValidationError('Descriptor/constant pool count mismatch')
@@ -93,3 +95,51 @@ class ReferenceResolver:
                          getattr(entry, 'token', None),
                          getattr(entry, 'internal_offset', None) if entry.tag in (5, 6) else None,
                          signature, field_type)
+
+    def class_type(self, index, *, array=False):
+        ref = self.resolve(index, (1,))
+        entry = self.cap.constant_pool.constant_pool[index]
+        encoded = (0x8000 | entry.package_token << 8 | ref.class_token
+                   if ref.external else ref.class_offset)
+        return ref, Type('reference[]' if array else 'reference', encoded)
+
+    def resolve_interface(self, index, method_token, nargs):
+        """Classref + method token; its signature is NOT stored in the CP.
+
+        Bindings use the ordinary reference identity with tag 1 (Classref),
+        plus the interface method token. Never guess argument types from nargs.
+        """
+        if type(method_token) is not int or not 0 <= method_token <= 255:
+            raise IRValidationError('Invalid interface method token')
+        if type(nargs) is not int or not 1 <= nargs <= 255:
+            raise IRValidationError('Invalid invokeinterface nargs')
+        ref = self.resolve(index, (1,))
+        owner = f'c{ref.class_token}' if ref.external else f'o{ref.class_offset}'
+        major, minor = ref.package_version
+        key = f'{ref.package_aid}@{major}.{minor}:{owner}:t1:m{method_token}'
+        if key not in self.interface_signatures:
+            raise IRValidationError(f'Missing explicit interface signature: {key}')
+        spec = self.interface_signatures[key]
+
+        def read_type(value, *, returns=False):
+            if not isinstance(value, dict) or set(value) - {'kind', 'class_ref'}:
+                raise IRValidationError(f'Invalid interface type binding: {key}')
+            kind = value.get('kind')
+            allowed = {'boolean', 'byte', 'short', 'int', 'reference', 'boolean[]',
+                       'byte[]', 'short[]', 'int[]', 'reference[]'}
+            if returns:
+                allowed.add('void')
+            class_ref = value.get('class_ref')
+            if not isinstance(kind, str) or kind not in allowed or (class_ref is not None and
+                    (kind not in ('reference', 'reference[]') or type(class_ref) is not int
+                     or not 0 <= class_ref <= 65535)):
+                raise IRValidationError(f'Invalid interface type binding: {key}')
+            return Type(kind, class_ref)
+
+        if not isinstance(spec, dict) or set(spec) != {'parameters', 'returns'} or not isinstance(spec['parameters'], list):
+            raise IRValidationError(f'Invalid interface signature binding: {key}')
+        sig = Signature(tuple(read_type(t) for t in spec['parameters']),
+                        read_type(spec['returns'], returns=True))
+        if 1 + sum(t.slots for t in sig.parameters) != nargs:
+            raise IRValidationError(f'Interface signature/nargs mismatch: {key}')
+        return replace(ref, member_token=method_token, signature=sig)

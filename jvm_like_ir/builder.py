@@ -7,7 +7,7 @@ from .model import (Argument, Block, Constant, Edge, LoweringError, Method,
 
 _ENDS = {Op.BRANCH, Op.GOTO, Op.SWITCH, Op.RETURN, Op.THROW}
 _THROWS = {Op.FIELD_LOAD, Op.FIELD_STORE, Op.ARRAY_LOAD, Op.ARRAY_STORE,
-           Op.ARRAY_LENGTH, Op.NEW, Op.NEW_ARRAY, Op.CALL}
+           Op.ARRAY_LENGTH, Op.NEW, Op.NEW_ARRAY, Op.CALL, Op.CHECKCAST}
 
 
 class JVMLikeIRBuilder:

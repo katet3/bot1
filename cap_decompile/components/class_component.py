@@ -231,6 +231,8 @@ class ClassComponent(CAPComponent):
 
     @classmethod
     def parse_from_bytes(cls, data: bytes, cap_version: CAPVersion):
+        if len(data) < 3:
+            raise ValueError("Truncated Class component")
         reader = BinaryReader(data)
 
         tag = reader.read_u1()
@@ -238,15 +240,18 @@ class ClassComponent(CAPComponent):
             raise ValueError(f"Invalid Class component tag {tag}")
 
         size = reader.read_u2()
+        if size != len(data) - 3:
+            raise ValueError("Class component size mismatch")
         component_end = reader.offset + size
 
         signature_pool = []
-        #todo other cap_version
-        if cap_version in (CAPVersion.V22, CAPVersion.V21):
-            pass
-        else:
+        if cap_version != CAPVersion.V21:
+            if reader.remaining() < 2:
+                raise ValueError("Missing signature_pool_length in CAP 2.2+ Class")
             signature_pool_length = reader.read_u2()
             sig_end = reader.offset + signature_pool_length
+            if sig_end > component_end:
+                raise ValueError("Truncated Class signature pool")
 
             while reader.offset < sig_end:
                 signature_pool.append(parse_type_descriptor(reader))

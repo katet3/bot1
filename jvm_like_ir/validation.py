@@ -149,6 +149,11 @@ def _statement_types(s, capacity):
         require(s.mode in conversions, 'Unknown conversion')
         src,dst = conversions[s.mode]
         require(types == (src,) and result == dst, 'Invalid conversion types')
+    elif s.op == 'checkcast':
+        require(types == (ValueType.REFERENCE,) and result is ValueType.REFERENCE
+                and semantic is ValueType.REFERENCE, 'Invalid reference cast')
+        if s.semantic_type.kind in ('reference', 'reference[]'):
+            require(s.reference is not None and s.reference.tag == 1, 'Missing cast class reference')
     elif s.op == 'compare_signed':
         require(types == (ValueType.INT,ValueType.INT) and result is ValueType.SHORT, 'Invalid icmp')
     elif s.op in ('load_field','store_field'):
@@ -179,14 +184,14 @@ def _statement_types(s, capacity):
             require(s.reference is not None and s.reference.tag == 1, 'Missing reference-array class')
     elif s.op == 'call':
         require(s.reference is not None and s.reference.signature is not None, 'Missing call signature')
-        require(s.mode in ('invokevirtual','invokespecial','invokestatic'), 'Invalid invocation kind')
+        require(s.mode in ('invokevirtual','invokespecial','invokestatic','invokeinterface'), 'Invalid invocation kind')
         sig = s.reference.signature
         expected = (() if s.mode == 'invokestatic' else (ValueType.REFERENCE,)) + tuple(ValueType.of(t) for t in sig.parameters)
         output = None if sig.returns.kind == 'void' else ValueType.of(sig.returns)
         require(types == expected and result == output and s.semantic_type == sig.returns, 'Invalid call operands/result')
     else:
         raise LoweringError(f'Unknown statement {s.op}')
-    must_throw = s.op in {'load_field','store_field','array_load','array_store','array_length','new_object','new_array','call','div','rem'}
+    must_throw = s.op in {'load_field','store_field','array_load','array_store','array_length','new_object','new_array','call','checkcast','div','rem'}
     require(s.may_throw == must_throw, 'Incorrect may_throw annotation')
 
 

@@ -1,0 +1,99 @@
+{
+  "package_aid": "112233445566",
+  "package_version": [
+    1,
+    0
+  ],
+  "imports": [
+    {
+      "aid": "a0000000620101",
+      "version": [
+        1,
+        5
+      ]
+    },
+    {
+      "aid": "a0000000620201",
+      "version": [
+        1,
+        5
+      ]
+    },
+    {
+      "aid": "a0000000620102",
+      "version": [
+        1,
+        5
+      ]
+    },
+    {
+      "aid": "a0000000620001",
+      "version": [
+        1,
+        0
+      ]
+    }
+  ],
+  "class_names": {
+    "112233445566@1.0:o2": "name1.name1",
+    "a0000000620101@1.5:c3": "javacard.framework.Applet",
+    "a0000000620101@1.5:c7": "javacard.framework.ISOException",
+    "a0000000620101@1.5:c8": "javacard.framework.JCSystem",
+    "a0000000620101@1.5:c10": "javacard.framework.APDU",
+    "a0000000620101@1.5:c16": "javacard.framework.Util",
+    "a0000000620201@1.5:c1": "javacardx.crypto.Cipher",
+    "a0000000620102@1.5:c0": "javacard.security.Key",
+    "a0000000620102@1.5:c10": "javacard.security.DESKey",
+    "a0000000620102@1.5:c13": "javacard.security.KeyBuilder"
+  },
+  "method_names": {
+    "112233445566@1.0:internal:t6:o1": "<init>",
+    "112233445566@1.0:internal:t6:o56": "install",
+    "112233445566@1.0:internal:t6:o76": "process",
+    "112233445566@1.0:internal:t6:o142": "setDesKey",
+    "112233445566@1.0:internal:t6:o228": "setDesICV",
+    "112233445566@1.0:internal:t6:o256": "getDesKey",
+    "112233445566@1.0:internal:t6:o306": "doDesCipher",
+    "a0000000620101@1.5:c3:t6:m0": "<init>",
+    "a0000000620101@1.5:c3:t3:m2": "register",
+    "a0000000620101@1.5:c3:t3:m3": "selectingApplet",
+    "a0000000620101@1.5:c10:t3:m1": "getBuffer",
+    "a0000000620101@1.5:c10:t3:m6": "setIncomingAndReceive",
+    "a0000000620101@1.5:c10:t3:m8": "setOutgoingAndSend",
+    "a0000000620101@1.5:c7:t6:m1": "throwIt",
+    "a0000000620101@1.5:c8:t6:m18": "requestObjectDeletion",
+    "a0000000620101@1.5:c8:t6:m1": "beginTransaction",
+    "a0000000620101@1.5:c8:t6:m2": "commitTransaction",
+    "a0000000620101@1.5:c16:t6:m1": "arrayCopy",
+    "a0000000620201@1.5:c1:t6:m0": "getInstance",
+    "a0000000620201@1.5:c1:t3:m4": "init",
+    "a0000000620201@1.5:c1:t3:m3": "init",
+    "a0000000620201@1.5:c1:t3:m1": "doFinal",
+    "a0000000620102@1.5:c13:t6:m0": "buildKey",
+    "a0000000620102@1.5:c10:t1:m5": "setKey"
+  },
+  "field_names": {
+    "112233445566@1.0:o2:t2:m0": "desKey",
+    "112233445566@1.0:o2:t2:m1": "desICV",
+    "112233445566@1.0:o2:t2:m2": "desEcbCipher",
+    "112233445566@1.0:o2:t2:m3": "desCbcCipher",
+    "112233445566@1.0:o2:t2:m4": "tempDesKey2",
+    "112233445566@1.0:o2:t2:m5": "tempDesKey3",
+    "112233445566@1.0:o2:t2:m6": "desKeyLen"
+  },
+  "interface_signatures": {
+    "a0000000620102@1.5:c10:t1:m5": {
+      "parameters": [
+        {
+          "kind": "byte[]"
+        },
+        {
+          "kind": "short"
+        }
+      ],
+      "returns": {
+        "kind": "void"
+      }
+    }
+  }
+}

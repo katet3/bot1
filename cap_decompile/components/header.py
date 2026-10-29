@@ -70,16 +70,23 @@ class HeaderComponent(CAPComponent):
     package: PackageInfo
 
     cap_version: CAPVersion
+    # package_name_info is present starting with CAP 2.2 (JVMS 6.4).
+    # None denotes CAP 2.1; b"" denotes an explicitly empty name in CAP 2.2+.
+    package_name: bytes | None = None
 
     @classmethod
     def parse_from_bytes(cls, data: bytes):
+        if len(data) < 13:
+            raise ValueError("Truncated Header component")
         reader = BinaryReader(data)
 
         tag = reader.read_u1()
         if tag != cls.COMPONENT_TAG:
-            raise ValueError(f"Invalid Directory tag: {tag}")
+            raise ValueError(f"Invalid Header tag: {tag}")
         
         size = reader.read_u2()
+        if size != len(data) - 3:
+            raise ValueError("Header component size mismatch")
         start_remaining = reader.remaining()
         
         magic = reader.read_u4()
@@ -99,6 +106,8 @@ class HeaderComponent(CAPComponent):
         pkg_major = reader.read_u1()
 
         aid_length = reader.read_u1()
+        if not 5 <= aid_length <= 16 or reader.remaining() < aid_length:
+            raise ValueError("Invalid or truncated package AID in Header")
         aid = reader.read_bytes(aid_length)
 
         package = PackageInfo(
@@ -106,6 +115,15 @@ class HeaderComponent(CAPComponent):
             minor_version=pkg_minor,
             major_version=pkg_major
         )
+
+        package_name = None
+        if cap_version != CAPVersion.V21:
+            if reader.remaining() < 1:
+                raise ValueError("Missing package_name_info in CAP 2.2+ Header")
+            name_length = reader.read_u1()
+            if reader.remaining() < name_length:
+                raise ValueError("Truncated package name in Header")
+            package_name = reader.read_bytes(name_length)
 
         if reader.remaining() != 0:
             raise ValueError("Header parsing incomplete")
@@ -121,5 +139,6 @@ class HeaderComponent(CAPComponent):
             major_version=major_version,
             flags=flags,
             package=package,
-            cap_version=cap_version
+            cap_version=cap_version,
+            package_name=package_name,
         )

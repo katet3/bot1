@@ -595,7 +595,7 @@ OPCODES = {
     0x8B: ("invokevirtual", 2),
     0x8C: ("invokespecial", 2),
     0x8D: ("invokestatic", 2),
-    0x8E: ("invokeinterface", 2),
+    0x8E: ("invokeinterface", 4),
 
     # -----------------------------------------------------
     # object/array
@@ -610,8 +610,8 @@ OPCODES = {
 
     0x93: ("athrow", 0),
 
-    0x94: ("checkcast", 2),
-    0x95: ("instanceof", 2),
+    0x94: ("checkcast", 3),
+    0x95: ("instanceof", 3),
 
     # -----------------------------------------------------
     # wide increments
@@ -736,6 +736,9 @@ def parse_bytecode(bytecodes: bytes) -> List[Instruction]:
             offset = new_offset
             continue
 
+        if offset + 1 + operand_size > length:
+            raise ValueError(f"Truncated {mnemonic} at offset {offset}")
+
         operands = []
 
         # =================================================
@@ -808,6 +811,13 @@ def parse_bytecode(bytecodes: bytes) -> List[Instruction]:
         # =================================================
         # sinc
         # =================================================
+
+        elif mnemonic in ("checkcast", "instanceof"):
+            operands = [read_u1(bytecodes, offset + 1), read_u2(bytecodes, offset + 2)]
+
+        elif mnemonic == "invokeinterface":
+            operands = [read_u1(bytecodes, offset + 1), read_u2(bytecodes, offset + 2),
+                        read_u1(bytecodes, offset + 4)]
 
         elif mnemonic == "sinc":
 

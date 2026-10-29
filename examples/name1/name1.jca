@@ -1,0 +1,387 @@
+// converted by version 1.3
+// on Wed Oct 28 14:16:50 GMT+07:00 2026
+
+.package name1 {
+	.aid 0x11:0x22:0x33:0x44:0x55:0x66;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x1 1.5;		//javacard/framework
+		0xA0:0x0:0x0:0x0:0x62:0x2:0x1 1.5;		//javacardx/crypto
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x2 1.5;		//javacard/security
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+	}
+
+	.applet {
+		0x11:0x22:0x33:0x44:0x55:0x66:0x0 name1;
+	}
+
+	.constantPool {
+		// 0
+		instanceFieldRef byte[] name1/desKey;
+		// 1
+		instanceFieldRef byte[] name1/desICV;
+		// 2
+		instanceFieldRef byte name1/desKeyLen;
+		// 3
+		instanceFieldRef 1.1 name1/desEcbCipher;
+		// 4
+		instanceFieldRef 1.1 name1/desCbcCipher;
+		// 5
+		instanceFieldRef 2.0 name1/tempDesKey3;
+		// 6
+		instanceFieldRef 2.0 name1/tempDesKey2;
+		// 7
+		staticMethodRef 2.13.0(BSZ)Ljavacard/security/Key;;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
+			.descriptor	Ljavacard/security/Key;	2.0;
+
+		// 8
+		staticMethodRef 0.3.0()V;		// javacard/framework/Applet.<init>()V
+		// 9
+		staticMethodRef 0.8.18()V;		// javacard/framework/JCSystem.requestObjectDeletion()V
+		// 10
+		classRef name1;
+		// 11
+		staticMethodRef name1/<init>()V;
+		// 12
+		virtualMethodRef 0.3.2([BSB)V;		// register([BSB)V
+		// 13
+		virtualMethodRef 0.3.3()Z;		// selectingApplet()Z
+		// 14
+		virtualMethodRef 0.10.1()[B;		// getBuffer()[B
+		// 15
+		virtualMethodRef 0.10.6()S;		// setIncomingAndReceive()S
+		// 16
+		staticMethodRef name1/setDesKey(Ljavacard/framework/APDU;S)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 17
+		staticMethodRef name1/setDesICV(Ljavacard/framework/APDU;S)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 18
+		staticMethodRef name1/doDesCipher(Ljavacard/framework/APDU;S)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 19
+		staticMethodRef 0.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 20
+		staticMethodRef 0.8.1()V;		// javacard/framework/JCSystem.beginTransaction()V
+		// 21
+		staticMethodRef 0.16.1([BS[BSS)S;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+		// 22
+		staticMethodRef 0.8.2()V;		// javacard/framework/JCSystem.commitTransaction()V
+		// 23
+		staticMethodRef 1.1.0(BZ)Ljavacardx/crypto/Cipher;;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
+			.descriptor	Ljavacardx/crypto/Cipher;	1.1;
+
+		// 24
+		classRef 2.10;		// javacard/security/DESKey
+		// 25
+		staticMethodRef name1/getDesKey()Ljavacard/security/Key;;
+			.descriptor	Ljavacard/security/Key;	2.0;
+
+		// 26
+		virtualMethodRef 1.1.4(Ljavacard/security/Key;B[BSS)V;		// init(Ljavacard/security/Key;B[BSS)V
+			.descriptor	Ljavacard/security/Key;	2.0;
+
+		// 27
+		virtualMethodRef 1.1.3(Ljavacard/security/Key;B)V;		// init(Ljavacard/security/Key;B)V
+			.descriptor	Ljavacard/security/Key;	2.0;
+
+		// 28
+		virtualMethodRef 1.1.1([BSS[BS)S;		// doFinal([BSS[BS)S
+		// 29
+		virtualMethodRef 0.10.8(SS)V;		// setOutgoingAndSend(SS)V
+	}
+
+	.class public name1 0 extends 0.3 {		// extends javacard/framework/Applet
+
+		.fields {
+			private byte[] desKey 0;		// [B
+			private byte[] desICV 1;		// [B
+			private 1.1 desEcbCipher 2;		// Ljavacardx/crypto/Cipher;
+			private 1.1 desCbcCipher 3;		// Ljavacardx/crypto/Cipher;
+			private 2.0 tempDesKey2 4;		// Ljavacard/security/Key;
+			private 2.0 tempDesKey3 5;		// Ljavacard/security/Key;
+			private byte desKeyLen 6;		// B
+			private static final byte INS_SET_DES_KEY = 32;		// B
+			private static final byte INS_SET_DES_ICV = 33;		// B
+			private static final byte INS_DO_DES_CIPHER = 34;		// B
+		}
+
+		.publicMethodTable 7 {
+			equals(Ljava/lang/Object;)Z;
+			register()V;
+			register([BSB)V;
+			selectingApplet()Z;
+			deselect()V;
+			getShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;;
+			select()Z;
+			process(Ljavacard/framework/APDU;)V;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public <init>()V 0 {
+			.stack 4;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 8;		// javacard/framework/Applet.<init>()V
+					aload_0;
+					bspush 32;
+					newarray 11;
+					putfield_a 0;		// reference name1/name1.desKey
+					aload_0;
+					bspush 8;
+					newarray 11;
+					putfield_a 1;		// reference name1/name1.desICV
+					aload_0;
+					sconst_0;
+					putfield_b 2;		// byte name1/name1.desKeyLen
+					aload_0;
+					sconst_5;
+					sconst_0;
+					invokestatic 23;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
+					putfield_a 3;		// reference name1/name1.desEcbCipher
+					aload_0;
+					sconst_1;
+					sconst_0;
+					invokestatic 23;		// javacardx/crypto/Cipher.getInstance(BZ)Ljavacardx/crypto/Cipher;
+					putfield_a 4;		// reference name1/name1.desCbcCipher
+					aload_0;
+					sconst_2;
+					sspush 192;
+					sconst_0;
+					invokestatic 7;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
+					putfield_a 5;		// reference name1/name1.tempDesKey3
+					invokestatic 9;		// javacard/framework/JCSystem.requestObjectDeletion()V
+					return;
+		}
+
+		.method public static install([BSB)V 1 {
+			.stack 5;
+			.locals 0;
+
+				L0:	new 10;		// name1/name1
+					dup;
+					invokespecial 11;		// name1/name1.<init>()V
+					aload_0;
+					sload_1;
+					sconst_1;
+					sadd;
+					aload_0;
+					sload_1;
+					baload;
+					invokevirtual 12;		// register([BSB)V
+					return;
+		}
+
+		.method public process(Ljavacard/framework/APDU;)V 7 {
+			.stack 3;
+			.locals 2;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_0;
+					invokevirtual 13;		// selectingApplet()Z
+					ifeq L2;
+				L1:	return;
+				L2:	aload_1;
+					invokevirtual 14;		// getBuffer()[B
+					astore_2;
+				L3:	aload_1;
+					invokevirtual 15;		// setIncomingAndReceive()S
+					sstore_3;
+				L4:	aload_2;
+					sconst_1;
+					baload;
+					stableswitch L8 32 34 L5 L6 L7;
+				L5:	aload_0;
+					aload_1;
+					sload_3;
+					invokespecial 16;		// name1/name1.setDesKey(Ljavacard/framework/APDU;S)V
+					goto L9;
+				L6:	aload_0;
+					aload_1;
+					sload_3;
+					invokespecial 17;		// name1/name1.setDesICV(Ljavacard/framework/APDU;S)V
+					goto L9;
+				L7:	aload_0;
+					aload_1;
+					sload_3;
+					invokespecial 18;		// name1/name1.doDesCipher(Ljavacard/framework/APDU;S)V
+					goto L9;
+				L8:	sspush 27904;
+					invokestatic 19;		// javacard/framework/ISOException.throwIt(S)V
+				L9:	return;
+		}
+
+		.method private setDesKey(Ljavacard/framework/APDU;S)V {
+			.stack 5;
+			.locals 2;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_1;
+					invokevirtual 14;		// getBuffer()[B
+					astore_3;
+				L1:	sconst_0;
+					sstore 4;
+				L2:	aload_3;
+					sconst_2;
+					baload;
+					stableswitch L9 1 2 L3 L6;
+				L3:	sload_2;
+					bspush 16;
+					if_scmpeq L5;
+				L4:	sspush 26368;
+					invokestatic 19;		// javacard/framework/ISOException.throwIt(S)V
+				L5:	bspush 16;
+					sstore 4;
+					goto L10;
+				L6:	sload_2;
+					bspush 24;
+					if_scmpeq L8;
+				L7:	sspush 26368;
+					invokestatic 19;		// javacard/framework/ISOException.throwIt(S)V
+				L8:	bspush 24;
+					sstore 4;
+					goto L10;
+				L9:	sspush 27270;
+					invokestatic 19;		// javacard/framework/ISOException.throwIt(S)V
+				L10:	invokestatic 20;		// javacard/framework/JCSystem.beginTransaction()V
+					aload_3;
+					sconst_5;
+					getfield_a_this 0;		// reference name1/name1.desKey
+					sconst_0;
+					sload_2;
+					invokestatic 21;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					aload_0;
+					sload 4;
+					putfield_b 2;		// byte name1/name1.desKeyLen
+					invokestatic 22;		// javacard/framework/JCSystem.commitTransaction()V
+					return;
+		}
+
+		.method private setDesICV(Ljavacard/framework/APDU;S)V {
+			.stack 5;
+			.locals 0;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	sload_2;
+					bspush 8;
+					if_scmpeq L2;
+				L1:	sspush 26368;
+					invokestatic 19;		// javacard/framework/ISOException.throwIt(S)V
+				L2:	aload_1;
+					invokevirtual 14;		// getBuffer()[B
+					sconst_5;
+					getfield_a_this 1;		// reference name1/name1.desICV
+					sconst_0;
+					bspush 8;
+					invokestatic 21;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					return;
+		}
+
+		.method private getDesKey()Ljavacard/security/Key; {
+			.stack 3;
+			.locals 1;
+
+			.descriptor	Ljavacard/security/Key;	2.0;
+
+				L0:	aconst_null;
+					astore_1;
+				L1:	getfield_b_this 2;		// byte name1/name1.desKeyLen
+					slookupswitch L4 2 16 L2 24 L3;
+				L2:	getfield_a_this 6;		// reference name1/name1.tempDesKey2
+					astore_1;
+					goto L5;
+				L3:	getfield_a_this 5;		// reference name1/name1.tempDesKey3
+					astore_1;
+					goto L5;
+				L4:	sspush 27013;
+					invokestatic 19;		// javacard/framework/ISOException.throwIt(S)V
+				L5:	aload_1;
+					checkcast 0 24;		// T_CLASSORINTERFACE javacard/security/DESKey
+					getfield_a_this 0;		// reference name1/name1.desKey
+					sconst_0;
+					invokeinterface 3 24 5;		// javacard/security/DESKey
+					aload_1;
+					areturn;
+		}
+
+		.method private doDesCipher(Ljavacard/framework/APDU;S)V {
+			.stack 6;
+			.locals 4;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	sload_2;
+					ifle L2;
+				L1:	sload_2;
+					bspush 8;
+					srem;
+					ifeq L3;
+				L2:	sspush 26368;
+					invokestatic 19;		// javacard/framework/ISOException.throwIt(S)V
+				L3:	aload_1;
+					invokevirtual 14;		// getBuffer()[B
+					astore_3;
+				L4:	aload_0;
+					invokespecial 25;		// name1/name1.getDesKey()Ljavacard/security/Key;
+					astore 4;
+				L5:	aload_3;
+					sconst_2;
+					baload;
+					ifne L7;
+				L6:	sconst_2;
+					goto L8;
+				L7:	sconst_1;
+				L8:	sstore 5;
+				L9:	aload_3;
+					sconst_3;
+					baload;
+					ifne L11;
+				L10:	getfield_a_this 3;		// reference name1/name1.desEcbCipher
+					goto L12;
+				L11:	getfield_a_this 4;		// reference name1/name1.desCbcCipher
+				L12:	astore 6;
+				L13:	aload 6;
+					getfield_a_this 4;		// reference name1/name1.desCbcCipher
+					if_acmpne L15;
+				L14:	aload 6;
+					aload 4;
+					sload 5;
+					getfield_a_this 1;		// reference name1/name1.desICV
+					sconst_0;
+					bspush 8;
+					invokevirtual 26;		// init(Ljavacard/security/Key;B[BSS)V
+					goto L16;
+				L15:	aload 6;
+					aload 4;
+					sload 5;
+					invokevirtual 27;		// init(Ljavacard/security/Key;B)V
+				L16:	aload 6;
+					aload_3;
+					sconst_5;
+					sload_2;
+					aload_3;
+					sconst_0;
+					invokevirtual 28;		// doFinal([BSS[BS)S
+					pop;
+					aload_1;
+					sconst_0;
+					sload_2;
+					invokevirtual 29;		// setOutgoingAndSend(SS)V
+					return;
+		}
+
+	}
+
+}

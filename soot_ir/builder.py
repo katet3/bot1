@@ -194,6 +194,12 @@ class _MethodBuilder:
             if op == "unary" and mode != "neg":
                 self.error(f"Unsupported unary operation {mode}")
             self.finish_numeric(stmt, self.assign(Expr("unary", "int", (self.int_value(args[0]),), "neg")))
+        elif op == "checkcast":
+            self.check_arity(stmt, args, 1, True)
+            target = self.symbols.type_name(semantic)
+            if target in NUMERIC or target == "void":
+                self.error("checkcast requires a reference target")
+            self.result(stmt, self.cast(args[0], target))
         elif op in ("convert", "cast"):
             self.check_arity(stmt, args, 1, True)
             target = kind(semantic) if semantic else {"s2b": "byte", "i2b": "byte", "i2s": "short", "s2i": "int"}.get(mode)

@@ -67,9 +67,10 @@ def build_jcvm_ir(
     cap_file: CAPFile,
     methods: Sequence[MethodInput],
     cfgs: Sequence[CFG],
+    *, interface_signatures: dict | None = None,
 ) -> list[JCVMMethodIR]:
     """Нормализовать JCVM-инструкции и проверить их стековую семантику."""
-    builder = IRBuilder(ReferenceResolver(cap_file))
+    builder = IRBuilder(ReferenceResolver(cap_file, interface_signatures))
     return [
         builder.build(method, cfg=cfg)
         for method, cfg in zip(methods, cfgs, strict=True)
@@ -103,10 +104,10 @@ def build_pysoot_model(
     return PySootAdapter().build(program, metadata)
 
 
-def load_angr_program(program: AdaptedProgram, *, entry_key: str | None = None):
+def load_angr_program(program: AdaptedProgram, *, entry_key: str | None = None, api_profile=None):
     """Создать angr.Project; не запускать install/process и исследование путей."""
     from angr_integration import AngrLoader
-    return AngrLoader().load(program, entry_key=entry_key)
+    return AngrLoader().load(program, entry_key=entry_key, api_profile=api_profile)
 
 
 def export_ir_methods(
@@ -203,9 +204,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--no-pysoot", action="store_true", help="Завершить конвейер на Soot IR")
     parser.add_argument("--no-angr", action="store_true", help="Завершить конвейер до загрузчика angr")
     parser.add_argument("--angr-entry", help="Устойчивый CAP-ключ метода входа (из pysoot_output/program.json)")
+    parser.add_argument('--javacard-profile', choices=('name1',), help='Явно включить ограниченные модели API для name1; без исполнения')
     args = parser.parse_args(argv)
     if args.angr_entry and (args.no_angr or args.no_pysoot):
         parser.error("--angr-entry нельзя использовать вместе с --no-angr или --no-pysoot")
+    if args.javacard_profile and (args.no_angr or args.no_pysoot):
+        parser.error('--javacard-profile требует загрузки angr')
     return args
 
 
@@ -221,9 +225,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         verify_methods(methods)
 
         # 3–5. Последовательные представления программы.
-        jcvm_methods = build_jcvm_ir(cap_file, methods, cfgs)
-        jvm_methods = build_jvm_like_ir(jcvm_methods)
         symbols = load_symbols(args.symbols)
+        jcvm_methods = build_jcvm_ir(cap_file, methods, cfgs,
+                                    interface_signatures=symbols.interface_signatures)
+        jvm_methods = build_jvm_like_ir(jcvm_methods)
         program = build_soot_ir(jvm_methods, symbols)
 
         # 6. Объекты pysoot и метаданные классов CAP.
@@ -234,7 +239,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         # 7. Загрузка объектов в angr. Исполнение апплета — отдельный этап.
         loaded_program = None
         if pysoot_program is not None and not args.no_angr:
-            loaded_program = load_angr_program(pysoot_program, entry_key=args.angr_entry)
+            loaded_program = load_angr_program(pysoot_program, entry_key=args.angr_entry, api_profile=args.javacard_profile)
 
         # 8. Сохранение результатов в едином каталоге outputs/.
         export_ir_methods(jcvm_methods, args.output_root / "ir_output")
