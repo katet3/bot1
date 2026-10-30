@@ -6,6 +6,8 @@ from .resolver import ReferenceResolver
 
 @dataclass
 class MethodInput:
+    """Canonical decoded input with method metadata and method-local handlers."""
+
     name: str
     token: int
     offset: int  # Method component info-relative header offset
@@ -20,8 +22,9 @@ class MethodInput:
 
 
 def methods_from_cap(cap_file, decode=None):
-    """Recover metadata dropped by the supplied CAPFile.to_model().
+    """Join linked methods with Descriptor metadata for the typed pipeline.
 
+    CAPFile.to_model delegates here; both entry points return MethodInput objects.
     Supports the supplied linker's blob-relative MethodInfo.offset convention.
     The typed pipeline accepts only ordinary concrete headers. Structural decoding
     of extended headers by the CAP linker does not enable their lowering here.

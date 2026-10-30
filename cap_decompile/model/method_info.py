@@ -22,6 +22,8 @@ from typing import List, Optional
 
 @dataclass
 class ExceptionHandler:
+    """Legacy raw handler record; typed IR uses method-local jcvm_ir.Handler."""
+
     start_offset: int
     stop_bit: bool
     active_length: int
@@ -31,6 +33,8 @@ class ExceptionHandler:
 
 @dataclass
 class Method:
+    """Legacy decoder container; CAPFile.to_model now returns jcvm_ir.MethodInput."""
+
     token: int
 
     bytecodes: bytes

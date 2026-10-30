@@ -13,11 +13,13 @@
 Регрессии находятся в `cfg_generator/tests/__init__.py` (маркер пакета),
 `test_exception_handlers.py` (14 проверок границ и графа) и `test_handler_pipeline.py`
 (3 проверки контрактов IR). Число 107 и `source_snapshot.json` относятся к исходному
-снимку, а не к текущему дереву после исправлений D-01–D-06.
+снимку, а не к текущему дереву после исправлений D-01–D-07.
 Дополнение D-05: обновлены classifier, leaders и edge builder; добавлен
 `cfg_generator/tests/test_control_flow.py` — 19 регрессий control flow и согласования IR.
 Дополнение D-06: исправлены размеры method headers и фиксация blob offset в linker;
 добавлены `cap_decompile/tests/__init__.py` и `test_method_headers.py` — 16 регрессий.
+Дополнение D-07: `CAPFile.to_model()` делегирует canonical typed adapter;
+добавлен `cap_decompile/tests/test_model_conversion.py` — 16 регрессий публичного API.
 
 ## main.py
 
@@ -138,6 +140,17 @@ Blob offset фиксируется до header; усечённые header/body �
 Определения: helpers `component()`, `descriptor()`, `cap_for()`; тестовый класс
 `MethodHeaderTests`.
 
+### `cap_decompile/tests/test_model_conversion.py`
+
+Проверяет сохранение metadata публичным `CAPFile.to_model()`: signatures и header
+limits, static flag, идентичность методов, method-local ordered handlers,
+согласованность с Descriptor, отказ на неподдержанном профиле и путь до Soot.
+Содержит проверки двух реальных CAP и независимости импорта parser от IR/runtime.
+
+[Исходник](../cap_decompile/tests/test_model_conversion.py) · [Руководство](modules/cap_decompile.md)
+
+Определения: `make_cap()`; `ModelConversionTests`.
+
 ### `cap_decompile/components/reference_location.py`
 
 Бинарные сведения о расположениях ссылок CAP.
@@ -180,7 +193,8 @@ Blob offset фиксируется до header; усечённые header/body �
 
 ### `cap_decompile/model/cap_file.py`
 
-Сборка CAPFile, ограниченная validate/link и legacy to_model.
+Сборка CAPFile, ограниченная validate/link; `to_model` — ленивый фасад общего
+`jcvm_ir.methods_from_cap`, возвращающий `list[MethodInput]`.
 
 [Исходник](../cap_decompile/model/cap_file.py) · [Руководство](modules/cap_decompile.md)
 
@@ -503,7 +517,8 @@ Success/errors, add/extend/merge и текстовый отчёт.
 
 ### `jcvm_ir/adapter.py`
 
-Восстанавливает MethodInput из CAP/Descriptor, signatures/slots и local handler offsets.
+Общая реализация извлечения MethodInput из CAP/Descriptor для `methods_from_cap`
+и `CAPFile.to_model`: signatures/slots и local handler offsets.
 
 [Исходник](../jcvm_ir/adapter.py) · [Руководство](modules/jcvm_ir.md)
 

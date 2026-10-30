@@ -10,9 +10,10 @@
 позже через `SymbolTable` и профиль runtime.
 
 Рабочий вход конвейера: `CAPContainer.load()` → `CAPFileBuilder.build(container)`.
-Методы для следующей стадии извлекаются через `jcvm_ir.methods_from_cap(cap)`.
-Старый `CAPFile.to_model()` не следует использовать для новых интеграций: он
-не передаёт достаточные заголовки, подписи и exception metadata.
+Методы для следующей стадии извлекаются через `jcvm_ir.methods_from_cap(cap)`
+либо `cap.to_model()`. После D-07 второй вызов делегирует первому и возвращает
+тот же `list[MethodInput]`. Проверки Descriptor, заголовка и координат обработчиков
+сосредоточены в одном adapter; второго варианта преобразования больше нет.
 
 ## Контракты данных
 
@@ -49,6 +50,45 @@ Container индексирует компоненты по короткому и
 поддержанным контрактом. `Applet.cap` не включён в `REQUIRED_COMPONENTS`, но builder
 читает его безусловно; отсутствие приводит к ошибке, а не к поддержке library CAP.
 
+## Публичное преобразование и миграция D-07
+
+Раньше `to_model()` декодировал инструкции, но заполнял поля заголовка и token
+значением `None`; собранный список handlers отбрасывался. Signature и static flag
+отсутствовали. Даже заполнение только числовых полей не сделало бы этот результат
+пригодным для typed IR: требуются корректные координаты и тип `jcvm_ir.Handler`.
+
+Теперь `CAPFile.to_model()` — фасад `methods_from_cap(self)`. Используется общий
+join по info-relative offset, а не по порядку linked methods или token. Token
+может повторяться в разных классах. Сохраняются signature, `is_static`, header
+limits, bytecodes, instructions, имя метода и упорядоченная таблица handlers.
+
+| Контракт | До D-07 | После D-07 |
+| --- | --- | --- |
+| Тип результата | `list[cap_decompile.model.method_info.Method]` | `list[jcvm_ir.MethodInput]` |
+| `token`, `max_stack`, `nargs`, `max_locals` | `None` | Значения Descriptor/header, проверенные общим adapter |
+| `name`, `signature`, `is_static` | Отсутствуют | Имя с AID/class offset/method offset, разобранная подпись, static flag |
+| `offset` | Начало header относительно methods blob | Начало header относительно info-части Method component |
+| `exception_handlers` | `None` | `tuple[jcvm_ir.Handler, ...]` в координатах bytecode тела, включая пустой tuple |
+| `is_extended` | `None` | Поля нет; unsupported headers явно отвергаются |
+
+Клиенты, проверяющие тип `Method`, должны перейти на `MethodInput`. Сырой header
+доступен в `cap.method_component.methods[*].header`; это отдельный структурный API.
+Для прежней blob-relative координаты из `MethodInput.offset` вычитается
+`1 + 8 * cap.method_component.handler_count`. Повторно сдвигать handlers нельзя:
+`start/end/target` уже method-local, диапазон `[start, end)`.
+
+Существующие вызовы `cap.to_model()` без аргументов сохраняются. Методы возвращаются
+в порядке Descriptor; повторный вызов создаёт новый список и новые decoded instructions.
+CAP не изменяется и не линкуется повторно. Неполные/несогласованные linked metadata
+приводят к `IRValidationError` общего adapter. Пустая согласованная модель даёт `[]`;
+корневой `main.extract_methods` отдельно запрещает пустой набор для своего CLI.
+
+Импорт adapter выполняется внутри `to_model()`. Обычный импорт и структурное чтение
+`cap_decompile` не загружают JCVM IR или runtime. При вызове требуется установленный
+код `jcvm_ir` из этого же проекта; angr/pysoot для преобразования не требуются.
+Legacy dataclasses `Method`/`ExceptionHandler` оставлены доступными для старых
+импортов, но не являются результатом этого API и не заменяют typed input.
+
 ## Версии и исправления для name1
 
 Для CAP 2.2+ Header содержит package_name_info, Directory — 12 записей размеров
@@ -67,8 +107,8 @@ Class и Descriptor по нему, а не по порядку в списках
 | --- | --- | --- |
 | `container/zip_reader.py` | `ZipReader` | `list_files`, `read_file`, `read_all`; ZIP I/O, без интерпретации компонентов |
 | `container/cap_container.py` | `CAPContainer` | Выбор компонентов, required-set, чтение по имени; debug hex-print не участвует в семантике |
-| `model/cap_file.py` | `CAPFile`, `CAPFileBuilder` | Композиция parsers, validate/link; не переносить сюда lowering |
-| `model/method_info.py` | `Instruction`, `Method`, `ExceptionHandler`, `parse_bytecode`, switch parsers | Таблица opcode/длины, signed/unsigned operands, method-local targets |
+| `model/cap_file.py` | `CAPFile`, `CAPFileBuilder` | Композиция parsers, validate/link; `to_model` делегирует typed adapter, lowering здесь не выполняется |
+| `model/method_info.py` | `Instruction`, `Method`, `ExceptionHandler`, `parse_bytecode`, switch parsers | Таблица opcode/длины, signed/unsigned operands, method-local targets; `Method`/`ExceptionHandler` — legacy containers |
 | `model/constant_pool_entries.py` | Нет | Пустая заготовка; рабочие CP-модели находятся в `components/constant_pool.py` |
 | `model/references.py` | Нет | Пустая заготовка; семантический `Reference` находится в `jcvm_ir/model.py` |
 | `parser.py` | Нет | Пустой файл; не является entry point |
@@ -150,7 +190,12 @@ operands и тест method-local offsets. После parser-теста выпо
 повторную линковку и сохранение результата при ошибке. Бинарный Method component
 с ordinary header и handler проходит adapter → CFG → JCVM → JVM-like → Soot;
 extended header доходит до ожидаемого отказа typed adapter без вызова decoder.
-Эти тесты не зависят от angr, pysoot или Graphviz:
+Регрессии D-07: [test_model_conversion.py](../../cap_decompile/tests/test_model_conversion.py),
+ещё 16 тестов. Проверяются metadata для static/instance методов, нулевые значения,
+ordered handlers, join по offset, отклонение несогласованных входов, два реальных
+CAP и путь `to_model()` → Soot на бинарном Method component с handler.
+Отдельная проверка подтверждает, что импорт parser не загружает IR/runtime.
+Оба набора вместе содержат 32 теста и не зависят от angr, pysoot или Graphviz:
 
 ```powershell
 .\.venv-angr10\Scripts\python.exe -m unittest discover -s cap_decompile/tests -p "test_*.py" -v

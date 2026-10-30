@@ -10,8 +10,9 @@
 уровень; он ещё сохраняет operand stack и не зависит от angr/pysoot.
 
 Основной вызов: `IRBuilder(ReferenceResolver(cap, interface_signatures)).build(method, cfg=cfg)`.
-`method` следует получать из `methods_from_cap(cap)`. Передача упрощённого
-`CAPFile.to_model()` не даёт необходимых max_stack/nargs/max_locals/handlers.
+`method` следует получать из `methods_from_cap(cap)` либо `cap.to_model()`.
+После D-07 оба вызова возвращают один тип `MethodInput` с одинаковой валидацией:
+публичный метод CAPFile делегирует adapter и больше не создаёт неполный legacy Method.
 
 ## Модули и определения
 
@@ -28,6 +29,8 @@
 
 `MethodInput.offset` — info-relative offset header в Method component.
 `Operation.offset`, `Handler.start/end/target` — method-local bytecode coordinates.
+Этот контракт теперь распространяется и на `CAPFile.to_model()`. Его прежний
+blob-relative `offset` изменён; сырая координата остаётся в `MethodInfo.offset`.
 При извлечении методов учитывается начало methods blob `1 + 8 * handler_count`
 и двухбайтовый ordinary header. Этот расчёт нельзя переносить на extended headers.
 После D-06 CAP linker корректно читает extended header размером 4 байта, но adapter
@@ -146,3 +149,6 @@ reference tags и branch targets. Нужны негативные проверк
 Разделение structural/typed поддержки headers и координаты handlers после разбора
 бинарного Method component проверяет
 [test_method_headers.py](../../cap_decompile/tests/test_method_headers.py).
+Публичный `CAPFile.to_model()`, signatures/static flags, согласованность с общим
+adapter и прохождение до Soot проверяет
+[test_model_conversion.py](../../cap_decompile/tests/test_model_conversion.py).

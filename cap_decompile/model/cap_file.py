@@ -14,7 +14,10 @@ from cap_decompile.components.descriptor import DescriptorComponent
 
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from jcvm_ir.adapter import MethodInput
 
 
 @dataclass
@@ -44,58 +47,18 @@ class CAPFile:
         self.method_component.link_with_descriptor(self.descriptor)
 
 
-    def to_model(self):
+    def to_model(self) -> list["MethodInput"]:
+        """Return the same validated typed input as jcvm_ir.methods_from_cap.
 
-        from cap_decompile.model.method_info import (
-            Method,
-            ExceptionHandler,
-        )
+        Replaces the lossy legacy Method projection. Method offsets are now
+        Method.cap info-relative; handlers use method-local bytecode offsets.
+        Unsupported method profiles raise IRValidationError through the adapter.
+        Import locally so binary parsing alone does not load the IR stages.
+        """
+        from jcvm_ir.adapter import methods_from_cap
 
-        from cap_decompile.model.method_info import parse_bytecode
+        return methods_from_cap(self)
 
-        methods = []
-
-        for m in self.method_component.methods:
-
-            instructions = parse_bytecode(m.bytecodes)
-
-            handlers = []
-
-            for h in m.exception_handlers:
-
-                handlers.append(
-                    ExceptionHandler(
-                        start_offset=h.start_offset,
-                        stop_bit=h.stop_bit,
-                        active_length=h.active_length,
-                        handler_offset=h.handler_offset,
-                        catch_type_index=h.catch_type_index,
-                    )
-                )
-
-            methods.append(
-                Method(
-                    token=None,
-
-                    bytecodes=m.bytecodes,
-                    instructions=instructions,
-
-                    max_stack=None,
-                    nargs=None,
-                    max_locals=None,
-
-                    is_extended=None,
-
-                    exception_handlers=None,
-
-                    offset=getattr(m, "offset", None),
-                )
-            )
-
-        return methods
-        
-    
-        
 
 class CAPFileBuilder:
 
