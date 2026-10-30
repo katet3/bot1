@@ -9,7 +9,8 @@ from cfg_generator.utils.instruction_utils import (
     is_conditional_branch,
     is_unconditional_branch,
     is_switch,
-    is_return
+    is_return,
+    is_throw,
 )
 
 
@@ -109,10 +110,10 @@ def build_edges(blocks):
                     _add_edge(edges, blocks, block.id, target_block, EdgeType.SWITCH)
 
         # -------------------------------------------------
-        # RETURN
+        # RETURN / THROW (exception edges are built separately)
         # -------------------------------------------------
 
-        elif is_return(mnemonic):
+        elif is_return(mnemonic) or is_throw(mnemonic):
             continue
 
         # -------------------------------------------------

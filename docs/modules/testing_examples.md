@@ -10,7 +10,49 @@
 Soot IR, а часть проходит настоящий CAP от parser до angr. Эти уровни дополняют
 друг друга и не являются взаимозаменяемыми доказательствами.
 
-## Набор из 93 тестов
+## Регрессии D-01–D-06
+
+После исправлений ранних стадий проходит 87 тестов без внешних зависимостей:
+
+| Набор | Количество | Что проверяет |
+| --- | --- | --- |
+| `cap_decompile/tests/test_method_headers.py` | 16 | Размеры 2/4 байта, смешанные headers, blob offsets и handler prefix, усечение и неверные counts, повторная линковка, отсутствие частичного результата, явный отказ typed adapter для extended и бинарный Method component до Soot |
+| `verification_engine/tests` | 35 | Диагностики правил, плоский отчёт, отсутствующие концы рёбер |
+| `cfg_generator/tests/test_exception_handlers.py` | 14 | Handler и legacy Mapping, границы инструкций/блоков, half-open диапазоны, порядок и отсутствие частичных изменений при ошибке |
+| `cfg_generator/tests/test_handler_pipeline.py` | 3 | Согласованность CFG с JCVM, порядок Soot traps, catch types/stop_bit, method-local координаты после CAP metadata adapter |
+| `cfg_generator/tests/test_control_flow.py` | 19 | Все 32 conditional forms, дальние и обратные `_w`, boundaries после terminators, отсутствие fallthrough у throw, handlers/Soot traps и отказ для `jsr/ret` |
+
+Из корня проекта:
+
+```powershell
+.\.venv-angr10\Scripts\python.exe -m unittest discover -s cap_decompile/tests -p "test_*.py" -v
+.\.venv-angr10\Scripts\python.exe -m unittest discover -s cfg_generator/tests -p "test_*.py" -v
+.\.venv-angr10\Scripts\python.exe -m unittest discover -s verification_engine/tests -p "test_*.py" -v
+```
+
+Наборы сообщают соответственно `Ran 16 tests`, `Ran 36 tests`, `Ran 35 tests`,
+все — `OK`.
+Сквозные тесты D-04 используют синтетические структуры CAP-компонентов и байткод,
+не запускают angr и не подтверждают исполнение catch. Дополнительный smoke-прогон
+на имеющемся `examples/name1/name1.cap` проверяет 7 методов без обработчиков.
+Тесты D-05 строят условные ветвления и throw из реальных decoded byte sequences;
+проверка четырёх switch-форм использует уже декодированные Instruction и не
+закрывает дефекты их бинарного формата. Для throw проверяется сохранение требования
+`ordered_exception_dispatch` в Soot IR, а не исполнение в angr.
+
+Тесты D-06 читают настоящие байты Method component, включая handler table;
+остальные CAP-компоненты задаются минимальными структурами. Проверка ordinary
+метода проходит до Soot, extended — до явного отказа typed adapter. Это не полная
+CAP-фикстура с extended method и не проверка исполнения обработчика.
+
+Отдельный запуск `pysoot_adapter.tests.test_adapter.CAPIntegrationTests` на базе
+`e6d944f4f335070b8603880f66c9697a2a3e49bf` и с D-06 одинаково останавливается в
+`setUpClass`: `Missing explicit interface signature: a0000000620102@1.5:c10:t1:m5`.
+Вызов `build_jcvm_ir` в этом setup не передаёт `interface_signatures`; выполнено
+0 тестов класса. Эта существующая проблема тестовой настройки не включена в
+87 успешных регрессий и не исправляется изменением linker.
+
+## Исторический набор из 93 тестов
 
 | Модуль | Количество | Что проверяет |
 | --- | --- | --- |
@@ -21,12 +63,14 @@ Soot IR, а часть проходит настоящий CAP от parser до 
 | `angr_integration/tests/test_calls.py` | 6 | Virtual по CAP token, special target/constructor, null receiver, signed remainder и possible-zero guard |
 | `angr_integration/tests/test_javacard.py` | 20 | Install/APDU sequence, DES, symbolic P1, transactions/transient state, API identity и ограничения |
 
-Число тестов соответствует текущему snapshot, а не автоматически обновляемому
-счётчику документации. При добавлении/удалении теста обновите эту таблицу и общий
-документ. Исторический успешный журнал — `JAVACARD_TEST_RESULTS.txt`; он относится
+Таблица относится к исходному комплекту разработки; это не текущий счётчик
+пройденных тестов D-06. В Git-ревизии `e6d944f4f335070b8603880f66c9697a2a3e49bf`
+файл `integration_tests/test_name1.py` отсутствует, поэтому приведённая ниже
+историческая команда требует этого файла из соответствующего комплекта.
+Исторический успешный журнал — `JAVACARD_TEST_RESULTS.txt`; он относится
 к проверенному окружению Linux. Windows execution отдельно не подтверждено.
 
-Полный запуск из корня проекта:
+Команда исторического полного комплекта из корня проекта:
 
 ```powershell
 .\.venv-angr10\Scripts\python.exe -m unittest pysoot_adapter.tests.test_adapter angr_integration.tests.test_loader angr_integration.tests.test_heap integration_tests.test_name1 angr_integration.tests.test_calls angr_integration.tests.test_javacard -v

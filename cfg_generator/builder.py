@@ -10,7 +10,7 @@ from cfg_generator.model.cfg import CFG
 def build_cfg(method):
     """
     Полный цикл построения CFG для метода.
-    :param method: объект Method из cap_decompile
+    :param method: MethodInput с method-local обработчиками из methods_from_cap
     :return: объект CFG
     """
     # Шаг 1: поиск лидеров

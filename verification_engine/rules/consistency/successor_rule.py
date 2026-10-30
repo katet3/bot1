@@ -21,7 +21,7 @@ class SuccessorConsistencyRule(Rule):
 
                 errors.append(
                     VerificationError(
-                        code="SUCCESSOR_MISMATCH",
+                        error_type="SUCCESSOR_MISMATCH",
                         message=(
                             f"Block B{block.id}: "
                             f"expected {expected}, actual {actual}"

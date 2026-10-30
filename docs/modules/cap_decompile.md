@@ -20,7 +20,7 @@
 | --- | --- | --- |
 | `CAPContainer.components` | short component name → bytes | Исходный бинарный payload без преобразования |
 | `CAPFile` | Header, Directory, Import, Applet, CP, Class, Method, StaticField, RefLocation, Descriptor | Связь между компонентами; историческое поле `import_componet` написано именно так |
-| `MethodInfo` | Header, bytecodes, handler slice, offset | Linker offset относительно methods blob не равен публичному CAP key |
+| `MethodInfo` | Header, bytecodes, handler slice, offset | Начало header относительно methods blob, без handler_count и таблицы handlers; не равно публичному CAP key |
 | `Instruction` | `offset`, `opcode`, `mnemonic`, `operands` | Offset от начала bytecode тела; branch targets уже абсолютные внутри метода |
 | `ExceptionHandlerInfo` | start, active length, handler offset, catch index, stop bit | Перевод координат выполняет adapter JCVM |
 
@@ -39,7 +39,10 @@
 4. `CAPFile.validate()` сейчас сверяет только размер Header с Directory.
 5. `CAPFile.link()` вызывает `MethodComponent.link_with_descriptor`.
 6. Linker последовательно читает headers и тела по bytecode_count из Descriptor.
-   `methods_from_cap` затем сопоставляет offset/сигнатуры и проверяет согласованность.
+   До header сохраняется курсор; перед чтением проверяются доступность header/body
+   и неотрицательный целочисленный bytecode_count. Новый список methods публикуется
+   только после чтения всех методов. `methods_from_cap` затем сопоставляет
+   offset/сигнатуры и проверяет согласованность.
 
 Container индексирует компоненты по короткому имени. Несколько пакетов с одинаковыми
 именами компонентов могут перезаписать друг друга: multi-package ZIP не является
@@ -97,10 +100,35 @@ Class и Descriptor по нему, а не по порядку в списках
 
 ## Ограничения и обнаруженные дефекты
 
+После D-06 структурный parser различает два формата:
+
+| Формат | Размер | Поля после первого байта |
+| --- | --- | --- |
+| Ordinary | 2 байта | `nargs` и `max_locals` в двух nibble второго байта; `max_stack` в первом |
+| Extended (`flags & 0x8`) | 4 байта | `max_stack`, `nargs`, `max_locals` — по одному `u1` |
+
+Первый байт содержит flags и, для extended, нулевой padding. Формат сверяется с
+[Oracle Java Card VM Specification 3.0.5, §6.10.3](https://docs.oracle.com/cd/E59935_01/JCVMS.pdf).
+Раньше `max_stack` и `max_locals` extended header читались как `u2`, а обратный
+расчёт offset вычитал `...`. Теперь `MethodInfo.offset` равен курсору **перед**
+header: длина заголовка не участвует в обратном расчёте. Handler table остаётся
+в прежних info-relative координатах; её размер не прибавляется к blob offset.
+
+Усечённые header/body, ненулевой extended padding и неверный bytecode_count дают
+`ValueError` с blob offset. Счётчик должен быть `int >= 0`; `bool` не принимается.
+При ошибке позднего метода linker не заменяет прежний полный список частичным.
+Повторная успешная линковка заменяет список, не добавляет дубликаты.
+
+Это локальные проверки linker, а не строгий контракт всех операций BinaryReader.
+Последовательный порядок Descriptor сохраняется: поиск методов через seek по
+descriptor offset, gaps, проверка всех handler slices и лишних байтов здесь
+не добавлены. Flags структурно сохраняются; полноценный verifier заголовков
+и abstract/native semantics не реализованы.
+
 Поддержанный сквозной путь использует обычные concrete method headers.
-Вычисление offset extended header в linker содержит `...` вместо численной
-длины; такая ветвь может упасть до явного отказа `methods_from_cap`. Abstract/native
-и расширенные заголовки нельзя объявлять поддержанными на основании dataclass.
+`methods_from_cap` явно отвергает остальные **до** декодирования тела и расчёта
+его начала как `descriptor.method_offset + 2`. Корректное чтение extended header
+не включает его преобразование или исполнение; этот отказ покрыт тестом.
 
 Таблица OPCODES шире семантического поднабора. Raw fallback некоторых operands
 не эквивалентен нормализованным аргументам `lower()`; например, для новых immediate
@@ -117,8 +145,20 @@ payload. Версионную ветку следует выбирать по He
 operands и тест method-local offsets. После parser-теста выполняется JCVM lowering:
 он обнаруживает рассинхронизацию покрытия байткода.
 
-Регрессии: [integration_tests/test_name1.py](../../integration_tests/test_name1.py),
-в частности `BinaryBoundaryTests`, сравнение mnemonic/offset с JCA и CAP 2.1 fixture.
-Нужны отдельные будущие тесты malformed components, extended headers, отсутствующего
-Applet и collision компонентов нескольких пакетов. Изменение документации эти
-дефекты не исправляет.
+Регрессии D-06: [test_method_headers.py](../../cap_decompile/tests/test_method_headers.py),
+16 тестов. Они проверяют оба формата и смешанные методы, handler prefix, усечение,
+повторную линковку и сохранение результата при ошибке. Бинарный Method component
+с ordinary header и handler проходит adapter → CFG → JCVM → JVM-like → Soot;
+extended header доходит до ожидаемого отказа typed adapter без вызова decoder.
+Эти тесты не зависят от angr, pysoot или Graphviz:
+
+```powershell
+.\.venv-angr10\Scripts\python.exe -m unittest discover -s cap_decompile/tests -p "test_*.py" -v
+```
+
+Интеграционные проверки реального CAP находятся также в `CAPIntegrationTests`
+из [test_adapter.py](../../pysoot_adapter/tests/test_adapter.py); они требуют
+корректных interface signatures в вызываемом pipeline. Исторический
+`integration_tests/test_name1.py` отсутствует в базовой Git-ревизии этого обновления.
+Нужны отдельные будущие тесты malformed components, отсутствующего Applet
+и collision компонентов нескольких пакетов.

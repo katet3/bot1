@@ -40,7 +40,7 @@ def split_basic_blocks(
 
         should_close = False
 
-        # block ends on branch/switch/return
+        # Block ends on branch/switch/return/throw.
         if is_terminator(mnemonic):
             should_close = True
 

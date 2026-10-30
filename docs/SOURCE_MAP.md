@@ -2,12 +2,22 @@
 
 [К документации](README.md) · [Архитектура](PROJECT.md)
 
-Каталог охватывает **107 файлов Python**, включая 6 тестовых модулей и 14 пустых
+Исходный каталог охватывал **107 файлов Python**, включая 6 тестовых модулей и 14 пустых
 файлов. Для каждого указаны назначение, определения и профильное руководство.
 Это справочник исходных модулей; подробные контракты, инварианты и порядок
 изменений находятся в связанных руководствах. Состав определений извлечён из AST
 этого снимка, описания ответственности сверены с реализацией. Private helpers
 не становятся публичным API от присутствия в каталоге.
+
+Дополнение D-04: ниже актуализирован раздел CFG и добавлен `analysis/handlers.py`.
+Регрессии находятся в `cfg_generator/tests/__init__.py` (маркер пакета),
+`test_exception_handlers.py` (14 проверок границ и графа) и `test_handler_pipeline.py`
+(3 проверки контрактов IR). Число 107 и `source_snapshot.json` относятся к исходному
+снимку, а не к текущему дереву после исправлений D-01–D-06.
+Дополнение D-05: обновлены classifier, leaders и edge builder; добавлен
+`cfg_generator/tests/test_control_flow.py` — 19 регрессий control flow и согласования IR.
+Дополнение D-06: исправлены размеры method headers и фиксация blob offset в linker;
+добавлены `cap_decompile/tests/__init__.py` и `test_method_headers.py` — 16 регрессий.
 
 ## main.py
 
@@ -103,11 +113,30 @@ Magic, CAP version, package AID/version/name и основные проверк�
 
 ### `cap_decompile/components/method_component.py`
 
-Handler table, method headers/blob и linking с Descriptor; extended branch незавершена.
+Handler table, заголовки размером 2/4 байта и последовательный linking с Descriptor.
+Blob offset фиксируется до header; усечённые header/body отклоняются, список методов
+заменяется только после полного успеха. Typed adapter не допускает extended methods.
 
 [Исходник](../cap_decompile/components/method_component.py) · [Руководство](modules/cap_decompile.md)
 
-Определения: `ExceptionHandlerInfo`; `MethodHeaderInfo`; `ExtendedMethodHeaderInfo`; `MethodInfo`; `MethodComponent` — `parse_from_bytes()`, `link_with_descriptor()`.
+Определения: `ExceptionHandlerInfo`; `MethodHeaderInfo`; `ExtendedMethodHeaderInfo`; `MethodInfo`; `MethodComponent` — `parse_from_bytes()`, `link_with_descriptor()`, `_parse_method_header()`.
+
+### `cap_decompile/tests/__init__.py`
+
+Маркер пакета регрессионных тестов CAP parser/linker.
+
+[Исходник](../cap_decompile/tests/__init__.py) · [Руководство](modules/testing_examples.md)
+
+### `cap_decompile/tests/test_method_headers.py`
+
+16 проверок форматов headers, blob offsets, handler prefix, malformed lengths,
+повторной линковки, отсутствия частичного результата и границы typed adapter.
+Бинарный ordinary Method component с обработчиком проходит до Soot.
+
+[Исходник](../cap_decompile/tests/test_method_headers.py) · [Руководство](modules/cap_decompile.md)
+
+Определения: helpers `component()`, `descriptor()`, `cap_for()`; тестовый класс
+`MethodHeaderTests`.
 
 ### `cap_decompile/components/reference_location.py`
 
@@ -233,15 +262,26 @@ Instruction/Method и opcode decoder; branch operands становятся metho
 
 ### `cfg_generator/analysis/exception_edges.py`
 
-Консервативные exception edges; legacy dict contract несовместим с jcvm Handler.
+Консервативные exception edges по method-local handlers; проверка разбиения до
+изменения блоков, сохранение порядка и кратности.
 
 [Исходник](../cfg_generator/analysis/exception_edges.py) · [Руководство](modules/cfg_generator.md)
 
 Определения: `build_exception_edges()`.
 
+### `cfg_generator/analysis/handlers.py`
+
+Общая проверка method-local диапазонов и целей; чтение Handler либо явного legacy
+Mapping, отказ от сырых CAP-координат без adapter.
+
+[Исходник](../cfg_generator/analysis/handlers.py) · [Руководство](modules/cfg_generator.md)
+
+Определения: `ExceptionRegion`; `validated_exception_regions()`.
+
 ### `cfg_generator/analysis/leaders.py`
 
-Поиск leaders обычного control flow; handler boundaries не добавляются.
+Поиск целей, инструкций после всех terminators, границ защищённых диапазонов
+и входов handlers; ранний отказ для unsupported `jsr/ret`.
 
 [Исходник](../cfg_generator/analysis/leaders.py) · [Руководство](modules/cfg_generator.md)
 
@@ -297,11 +337,13 @@ EdgeType и пара IDs концов ребра.
 
 ### `cfg_generator/utils/instruction_utils.py`
 
-Классификация mnemonics; требует согласования с расширенными opcode forms.
+Общие предикаты для 32 условных форм, goto/switch/return/throw; отдельный отказ
+для decoded `jsr/ret`, не имеющих модели return-address.
 
 [Исходник](../cfg_generator/utils/instruction_utils.py) · [Руководство](modules/cfg_generator.md)
 
-Определения: `is_conditional_branch()`; `is_unconditional_branch()`; `is_switch()`; `is_return()`; `is_terminator()`.
+Определения: `is_conditional_branch()`; `is_unconditional_branch()`; `is_switch()`;
+`is_return()`; `is_throw()`; `is_terminator()`; `reject_unsupported_control_flow()`.
 
 ### `cfg_generator/visualization/ascii_exporter.py`
 

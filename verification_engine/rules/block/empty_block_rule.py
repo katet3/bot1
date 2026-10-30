@@ -18,7 +18,7 @@ class EmptyBlockRule(Rule):
 
                 errors.append(
                     VerificationError(
-                        code="EMPTY_BLOCK",
+                        error_type="EMPTY_BLOCK",
                         message=f"Block B{block.id} is empty"
                     )
                 )

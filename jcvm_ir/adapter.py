@@ -23,7 +23,8 @@ def methods_from_cap(cap_file, decode=None):
     """Recover metadata dropped by the supplied CAPFile.to_model().
 
     Supports the supplied linker's blob-relative MethodInfo.offset convention.
-    Rejects extended/abstract/native headers rather than trusting its incomplete parser.
+    The typed pipeline accepts only ordinary concrete headers. Structural decoding
+    of extended headers by the CAP linker does not enable their lowering here.
     """
     if decode is None:
         from cap_decompile.model.method_info import parse_bytecode

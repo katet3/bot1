@@ -47,7 +47,7 @@ class ExtendedMethodHeaderInfo:
 
 @dataclass
 class MethodInfo:
-    offset: int
+    offset: int  # Header start relative to methods_data, excluding the handler table.
     header: MethodHeaderInfo | ExtendedMethodHeaderInfo
     bytecodes: bytes
     exception_handlers: List[ExceptionHandlerInfo]
@@ -149,34 +149,44 @@ class MethodComponent(CAPComponent):
         Разбирает methods_data последовательно, используя информацию
         из method_descriptor_info (bytecode_count).
         Порядок методов соответствует порядку class_descriptor_info и
-        method_descriptor_info внутри них.
+        method_descriptor_info внутри них. Публикует список только после
+        успешного чтения всех методов; offset сохраняется до чтения заголовка.
         """
-        from .descriptor import DescriptorComponent  # на всякий случай
-
         reader = BinaryReader(self.methods_data)
-        self.methods = []
+        linked_methods = []
 
         for cls_desc in descriptor_component.classes:
             for m_desc in cls_desc.methods:
                 # Читаем method_header
+                method_offset = reader.tell()
                 header = self._parse_method_header(reader)
 
                 # Байткоды заданной длины
-                bytecodes = reader.read_bytes(m_desc.bytecode_count)
+                bytecode_count = m_desc.bytecode_count
+                if type(bytecode_count) is not int or bytecode_count < 0:
+                    raise ValueError(
+                        f"Invalid bytecode_count {bytecode_count!r} at blob offset {method_offset}"
+                    )
+                if bytecode_count > reader.remaining():
+                    raise ValueError(
+                        f"Truncated method bytecodes at blob offset {method_offset}: "
+                        f"expected {bytecode_count} bytes, available {reader.remaining()}"
+                    )
+                bytecodes = reader.read_bytes(bytecode_count)
 
                 # Обработчики исключений
                 start_idx = m_desc.exception_handler_index
                 end_idx = start_idx + m_desc.exception_handler_count
                 handlers = self.exception_handlers[start_idx:end_idx]
 
-                self.methods.append(MethodInfo(
-                    # offset можно сохранить как позицию начала метода в methods_data,
-                    # но для дальнейшей работы он не обязателен.
-                    offset=reader.tell() - len(bytecodes) - (2 if isinstance(header, MethodHeaderInfo) else ...),
+                linked_methods.append(MethodInfo(
+                    offset=method_offset,
                     header=header,
                     bytecodes=bytecodes,
                     exception_handlers=handlers
                 ))
+
+        self.methods = linked_methods
 
     # =========================
     # Header parsing
@@ -184,19 +194,31 @@ class MethodComponent(CAPComponent):
 
     @staticmethod
     def _parse_method_header(reader: BinaryReader):
+        """Decode the 2-byte or 4-byte structural header, independently of IR support."""
+        header_offset = reader.tell()
+        if reader.remaining() < 1:
+            raise ValueError(f"Truncated method header at blob offset {header_offset}: missing first byte")
         first = reader.read_u1()
         flags = (first >> 4) & 0xF
 
         is_extended = (flags & 0x8) != 0  # ACC_EXTENDED
 
-        if is_extended:
-            padding = first & 0xF
-            if padding != 0:
-                raise ValueError("Invalid padding in extended method header")
+        if is_extended and first & 0xF:
+            raise ValueError(f"Invalid padding in extended method header at blob offset {header_offset}")
 
-            max_stack = reader.read_u2()
+        header_size = 4 if is_extended else 2
+        if reader.remaining() < header_size - 1:
+            kind = "extended method" if is_extended else "method"
+            raise ValueError(
+                f"Truncated {kind} header at blob offset {header_offset}: "
+                f"expected {header_size} bytes, available {reader.remaining() + 1}"
+            )
+
+        if is_extended:
+            # flags/padding, max_stack, nargs and max_locals are four u1 fields.
+            max_stack = reader.read_u1()
             nargs = reader.read_u1()
-            max_locals = reader.read_u2()
+            max_locals = reader.read_u1()
 
             return ExtendedMethodHeaderInfo(
                 flags=flags,

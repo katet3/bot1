@@ -16,7 +16,7 @@ class ReachabilityRule(Rule):
         if len(entry) != 1:
             return [
                 VerificationError(
-                    code="INVALID_ENTRY",
+                    error_type="INVALID_ENTRY",
                     message="Expected exactly one entry block"
                 )
             ]

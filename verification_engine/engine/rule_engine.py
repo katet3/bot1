@@ -19,11 +19,12 @@ class RuleEngine:
             errors = rule.check(cfg, context)
 
             if errors:
-                report.add_error(errors)
+                report.extend(errors)
 
         return report
 
     def _build_context(self, cfg):
+        """Index valid edges for traversal while retaining all raw diagnostics."""
 
         adjacency = {}
         reverse = {}
@@ -35,6 +36,10 @@ class RuleEngine:
             reverse[b.id] = []
 
         for e in cfg.edges:
+            # Do not invent vertices or index half an edge. EdgeTargetRule still
+            # inspects every original edge via cfg.edges / context.edge_list.
+            if e.source not in block_map or e.target not in block_map:
+                continue
             adjacency[e.source].append(e.target)
             reverse[e.target].append(e.source)
 

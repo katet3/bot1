@@ -19,7 +19,7 @@ class EdgeTargetRule(Rule):
             if e.source not in block_ids:
                 errors.append(
                     VerificationError(
-                        code="INVALID_EDGE_SOURCE",
+                        error_type="INVALID_EDGE_SOURCE",
                         message=f"B{e.source} does not exist"
                     )
                 )
@@ -27,7 +27,7 @@ class EdgeTargetRule(Rule):
             if e.target not in block_ids:
                 errors.append(
                     VerificationError(
-                        code="INVALID_EDGE_TARGET",
+                        error_type="INVALID_EDGE_TARGET",
                         message=f"B{e.target} does not exist"
                     )
                 )
