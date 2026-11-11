@@ -11,7 +11,12 @@ CAPContainer и CAPFileBuilder читают бинарные компонент�
 Усечённые header/body отклоняются явно. Typed pipeline по-прежнему принимает
 только ordinary concrete methods: чтение extended header не включает его lowering.
 
-Проверки из корня проекта (32 теста D-06/D-07, без angr/pysoot):
+После D-08 все чтения BinaryReader требуют полный диапазон и сохраняют курсор
+при отказе. Декодер использует явные форматы операндов; raw fallback удалён.
+Исправлены размеры lookup-switch, wide increments и stack instructions с `mn`.
+Ошибки диапазона/декодирования — `BinaryParseError`, подкласс `ValueError`.
+
+Проверки из корня проекта (64 теста D-06–D-08, без angr/pysoot):
 
 ```powershell
 .\.venv-angr10\Scripts\python.exe -m unittest discover -s cap_decompile/tests -p "test_*.py" -v
@@ -25,4 +30,4 @@ CAPContainer и CAPFileBuilder читают бинарные компонент�
 - [Ограничения и технический долг](../docs/KNOWN_LIMITS.md)
 - [Проверки и примеры](../docs/modules/testing_examples.md)
 
-Редакция документации — 30 октября 2026 года, после исправления D-07.
+Редакция документации — 30 октября 2026 года, после исправления D-08.

@@ -130,8 +130,9 @@ JCVM IR восстанавливает эти сведения из исходн
 включая exception edges; его нельзя считать синонимом return instruction.
 При throw без локального handler блок имеет `is_exit=True`; с исключительным
 successor — False. Это структурный признак, не доказательство нормального возврата.
-Расхождение decoder/lowering по ширине npairs у `ilookupswitch` относится к D-08;
-его бинарный путь не исправлен классификацией (см. [KNOWN_LIMITS.md](../KNOWN_LIMITS.md)).
+После D-08 расхождение decoder/lowering по ширине npairs у `ilookupswitch`
+исправлено. Четыре switch-формы отдельно проверены из байтов до Soot в тестах
+CAP decoder; классификатор CFG при этом не менялся.
 
 ## Сопровождение
 
@@ -155,6 +156,10 @@ JVM-like IR → Soot IR. Проверка adapter использует синт�
 переходы, совпадение TRUE/FALSE целей, отсутствие fallthrough у goto/return/throw,
 взаимодействие throw с handlers и отказ для `jsr/ret`. Четыре switch-формы
 проверяются на уровне уже декодированных Instruction, включая общие targets.
+
+`cap_decompile/tests/test_bytecode_decoding.py` дополняет их бинарными switch
+fixtures: widths, signed values, unsigned counts, усечение и согласованность
+полученного CFG с независимым JCVM IR. Это проверки decoder/IR, не runtime dispatch.
 
 ```powershell
 .\.venv-angr10\Scripts\python.exe -m unittest discover -s cfg_generator/tests -p "test_*.py" -v

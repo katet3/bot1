@@ -78,6 +78,12 @@ terminators выделяются в отдельные блоки. Преобр�
 и `athrow` в `Op.THROW` уже выполнялось этим IR; исправление устраняет рассогласование
 предыдущей стадии, не добавляет runtime exception dispatch.
 
+После D-08 decoder читает lookup npairs как u2 и выдаёт нормализованные integer
+operands без raw fallback. Его размеры switch согласованы с существующим lowering;
+четыре бинарные формы проверены до Soot. Wide increments и `dup_x/swap_x` теперь
+имеют корректные decoded widths, но здесь по-прежнему получают явный unsupported
+отказ. Исправление бинарного формата не добавляет семантику неподдержанных операций.
+
 Стековый dataflow начинается с пустого entry stack. Для каждой операции проверяется
 совпадение требуемых pops, выполняются pushes и проверяется max_stack в **словах**.
 На обычном ребре передаётся итоговый стек; на exceptional — одна reference.
@@ -152,3 +158,6 @@ reference tags и branch targets. Нужны негативные проверк
 Публичный `CAPFile.to_model()`, signatures/static flags, согласованность с общим
 adapter и прохождение до Soot проверяет
 [test_model_conversion.py](../../cap_decompile/tests/test_model_conversion.py).
+
+Проверки operand layouts, signedness и бинарных switch-таблиц находятся в
+[test_bytecode_decoding.py](../../cap_decompile/tests/test_bytecode_decoding.py).

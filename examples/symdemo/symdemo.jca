@@ -1,0 +1,530 @@
+// converted by version 1.3
+// on Fri Nov 06 13:22:13 GMT+07:00 2026
+
+.package symdemo {
+	.aid 0xF0:0x53:0x59:0x4D:0x44:0x45:0x4D:0x4F;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x1 1.6;		//javacard/framework
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+	}
+
+	.applet {
+		0xF0:0x53:0x59:0x4D:0x44:0x45:0x4D:0x4F:0x0 symdemo;
+	}
+
+	.constantPool {
+		// 0
+		staticMethodRef 0.3.0()V;		// javacard/framework/Applet.<init>()V
+		// 1
+		classRef symdemo;
+		// 2
+		staticMethodRef symdemo/<init>()V;
+		// 3
+		virtualMethodRef 0.3.2([BSB)V;		// register([BSB)V
+		// 4
+		virtualMethodRef 0.3.3()Z;		// selectingApplet()Z
+		// 5
+		virtualMethodRef 0.10.1()[B;		// getBuffer()[B
+		// 6
+		staticMethodRef 0.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 7
+		staticMethodRef symdemo/receiveExact(Ljavacard/framework/APDU;S)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 8
+		staticMethodRef symdemo/runRare(Ljavacard/framework/APDU;)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 9
+		staticMethodRef symdemo/runOverflow(Ljavacard/framework/APDU;)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 10
+		staticMethodRef symdemo/runImpossible(Ljavacard/framework/APDU;)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 11
+		virtualMethodRef 0.10.6()S;		// setIncomingAndReceive()S
+		// 12
+		staticMethodRef symdemo/targetRare(Ljavacard/framework/APDU;)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 13
+		staticMethodRef symdemo/targetOverflow(Ljavacard/framework/APDU;)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 14
+		staticMethodRef symdemo/sendResult(Ljavacard/framework/APDU;BB)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 15
+		staticMethodRef symdemo/targetImpossible(Ljavacard/framework/APDU;)V;
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+		// 16
+		virtualMethodRef 0.10.8(SS)V;		// setOutgoingAndSend(SS)V
+	}
+
+	.class public final symdemo 0 extends 0.3 {		// extends javacard/framework/Applet
+
+		.fields {
+			private static final byte CLA_DEMO = -128;		// B
+			private static final byte INS_RARE = 16;		// B
+			private static final byte INS_OVERFLOW = 32;		// B
+			private static final byte INS_IMPOSSIBLE = 48;		// B
+			private static final short START_BALANCE = 30000;		// S
+			private static final short BALANCE_LIMIT = 32000;		// S
+			private static final short MAX_AMOUNT = 10000;		// S
+		}
+
+		.publicMethodTable 7 {
+			equals(Ljava/lang/Object;)Z;
+			register()V;
+			register([BSB)V;
+			selectingApplet()Z;
+			deselect()V;
+			getShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;;
+			select()Z;
+			process(Ljavacard/framework/APDU;)V;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method private <init>()V {
+			.stack 1;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 0;		// javacard/framework/Applet.<init>()V
+					return;
+		}
+
+		.method public static install([BSB)V 0 {
+			.stack 5;
+			.locals 1;
+
+				L0:	new 1;		// symdemo/symdemo
+					dup;
+					invokespecial 2;		// symdemo/symdemo.<init>()V
+					astore_3;
+				L1:	aload_3;
+					aload_0;
+					sload_1;
+					sconst_1;
+					sadd;
+					aload_0;
+					sload_1;
+					baload;
+					invokevirtual 3;		// register([BSB)V
+					return;
+		}
+
+		.method public process(Ljavacard/framework/APDU;)V 7 {
+			.stack 3;
+			.locals 1;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_0;
+					invokevirtual 4;		// selectingApplet()Z
+					ifeq L2;
+				L1:	return;
+				L2:	aload_1;
+					invokevirtual 5;		// getBuffer()[B
+					astore_2;
+				L3:	aload_2;
+					sconst_0;
+					baload;
+					bspush -128;
+					if_scmpeq L5;
+				L4:	sspush 28160;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L5:	aload_2;
+					sconst_2;
+					baload;
+					ifne L7;
+				L6:	aload_2;
+					sconst_3;
+					baload;
+					ifeq L8;
+				L7:	sspush 27270;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L8:	aload_2;
+					sconst_1;
+					baload;
+					slookupswitch L12 3 16 L9 32 L10 48 L11;
+				L9:	aload_0;
+					aload_1;
+					bspush 8;
+					invokespecial 7;		// symdemo/symdemo.receiveExact(Ljavacard/framework/APDU;S)V
+					aload_0;
+					aload_1;
+					invokespecial 8;		// symdemo/symdemo.runRare(Ljavacard/framework/APDU;)V
+					return;
+				L10:	aload_0;
+					aload_1;
+					sconst_2;
+					invokespecial 7;		// symdemo/symdemo.receiveExact(Ljavacard/framework/APDU;S)V
+					aload_0;
+					aload_1;
+					invokespecial 9;		// symdemo/symdemo.runOverflow(Ljavacard/framework/APDU;)V
+					return;
+				L11:	aload_0;
+					aload_1;
+					sconst_2;
+					invokespecial 7;		// symdemo/symdemo.receiveExact(Ljavacard/framework/APDU;S)V
+					aload_0;
+					aload_1;
+					invokespecial 10;		// symdemo/symdemo.runImpossible(Ljavacard/framework/APDU;)V
+					return;
+				L12:	sspush 27904;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+					return;
+		}
+
+		.method private receiveExact(Ljavacard/framework/APDU;S)V {
+			.stack 2;
+			.locals 3;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_1;
+					invokevirtual 5;		// getBuffer()[B
+					astore_3;
+				L1:	aload_3;
+					sconst_4;
+					baload;
+					sspush 255;
+					sand;
+					sstore 4;
+				L2:	sload 4;
+					sload_2;
+					if_scmpeq L4;
+				L3:	sspush 26368;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L4:	aload_1;
+					invokevirtual 11;		// setIncomingAndReceive()S
+					sstore 5;
+				L5:	sload 5;
+					sload_2;
+					if_scmpeq L7;
+				L6:	sspush 26368;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L7:	return;
+		}
+
+		.method private runRare(Ljavacard/framework/APDU;)V {
+			.stack 2;
+			.locals 9;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_1;
+					invokevirtual 5;		// getBuffer()[B
+					astore_2;
+				L1:	aload_2;
+					sconst_5;
+					baload;
+					sspush 255;
+					sand;
+					sstore_3;
+				L2:	aload_2;
+					bspush 6;
+					baload;
+					sspush 255;
+					sand;
+					sstore 4;
+				L3:	aload_2;
+					bspush 7;
+					baload;
+					sspush 255;
+					sand;
+					sstore 5;
+				L4:	aload_2;
+					bspush 8;
+					baload;
+					sspush 255;
+					sand;
+					sstore 6;
+				L5:	aload_2;
+					bspush 9;
+					baload;
+					sspush 255;
+					sand;
+					sstore 7;
+				L6:	aload_2;
+					bspush 10;
+					baload;
+					sspush 255;
+					sand;
+					sstore 8;
+				L7:	aload_2;
+					bspush 11;
+					baload;
+					sspush 255;
+					sand;
+					sstore 9;
+				L8:	aload_2;
+					bspush 12;
+					baload;
+					sspush 255;
+					sand;
+					sstore 10;
+				L9:	sload_3;
+					sload 4;
+					sadd;
+					sspush 220;
+					if_scmpeq L11;
+				L10:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L11:	sload 4;
+					sload 5;
+					sxor;
+					bspush 88;
+					if_scmpeq L13;
+				L12:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L13:	sload 5;
+					sload 6;
+					sadd;
+					sspush 303;
+					if_scmpeq L15;
+				L14:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L15:	sload 6;
+					sload 7;
+					sxor;
+					sspush 219;
+					if_scmpeq L17;
+				L16:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L17:	sload 7;
+					sload 8;
+					sadd;
+					sspush 253;
+					if_scmpeq L19;
+				L18:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L19:	sload 8;
+					sload 9;
+					sxor;
+					sspush 182;
+					if_scmpeq L21;
+				L20:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L21:	sload 9;
+					sload 10;
+					sadd;
+					sspush 221;
+					if_scmpeq L23;
+				L22:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L23:	sload_3;
+					sload 10;
+					sxor;
+					bspush 44;
+					if_scmpeq L25;
+				L24:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L25:	sload_3;
+					sload 4;
+					sadd;
+					sload 5;
+					sadd;
+					sload 6;
+					sadd;
+					sload 7;
+					sadd;
+					sload 8;
+					sadd;
+					sload 9;
+					sadd;
+					sload 10;
+					sadd;
+					sspush 997;
+					if_scmpeq L27;
+				L26:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L27:	aload_0;
+					aload_1;
+					invokespecial 12;		// symdemo/symdemo.targetRare(Ljavacard/framework/APDU;)V
+					return;
+		}
+
+		.method private runOverflow(Ljavacard/framework/APDU;)V {
+			.stack 4;
+			.locals 5;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_1;
+					invokevirtual 5;		// getBuffer()[B
+					astore_2;
+				L1:	aload_2;
+					sconst_5;
+					baload;
+					sspush 255;
+					sand;
+					sstore_3;
+				L2:	aload_2;
+					bspush 6;
+					baload;
+					sspush 255;
+					sand;
+					sstore 4;
+				L3:	sload_3;
+					sspush 256;
+					smul;
+					sload 4;
+					sadd;
+					sstore 5;
+				L4:	sload 5;
+					ifle L6;
+				L5:	sload 5;
+					sspush 10000;
+					if_scmple L7;
+				L6:	sspush 27264;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L7:	sspush 30000;
+					sload 5;
+					sadd;
+					sstore 6;
+				L8:	sload 6;
+					sspush 32000;
+					if_scmple L10;
+				L9:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L10:	sload 6;
+					ifge L12;
+				L11:	aload_0;
+					aload_1;
+					invokespecial 13;		// symdemo/symdemo.targetOverflow(Ljavacard/framework/APDU;)V
+					return;
+				L12:	aload_0;
+					aload_1;
+					bspush 32;
+					sconst_0;
+					invokespecial 14;		// symdemo/symdemo.sendResult(Ljavacard/framework/APDU;BB)V
+					return;
+		}
+
+		.method private runImpossible(Ljavacard/framework/APDU;)V {
+			.stack 2;
+			.locals 3;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_1;
+					invokevirtual 5;		// getBuffer()[B
+					astore_2;
+				L1:	aload_2;
+					sconst_5;
+					baload;
+					sspush 255;
+					sand;
+					sstore_3;
+				L2:	aload_2;
+					bspush 6;
+					baload;
+					sspush 255;
+					sand;
+					sstore 4;
+				L3:	sload_3;
+					sload 4;
+					sadd;
+					sspush 300;
+					if_scmpeq L5;
+				L4:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L5:	sload_3;
+					sload 4;
+					sxor;
+					sspush 138;
+					if_scmpeq L7;
+				L6:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L7:	sload_3;
+					sload 4;
+					sand;
+					bspush 65;
+					if_scmpeq L9;
+				L8:	sspush 27013;
+					invokestatic 6;		// javacard/framework/ISOException.throwIt(S)V
+				L9:	aload_0;
+					aload_1;
+					invokespecial 15;		// symdemo/symdemo.targetImpossible(Ljavacard/framework/APDU;)V
+					return;
+		}
+
+		.method private targetRare(Ljavacard/framework/APDU;)V {
+			.stack 4;
+			.locals 0;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_0;
+					aload_1;
+					bspush 16;
+					sconst_1;
+					invokespecial 14;		// symdemo/symdemo.sendResult(Ljavacard/framework/APDU;BB)V
+					return;
+		}
+
+		.method private targetOverflow(Ljavacard/framework/APDU;)V {
+			.stack 4;
+			.locals 0;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_0;
+					aload_1;
+					bspush 32;
+					sconst_1;
+					invokespecial 14;		// symdemo/symdemo.sendResult(Ljavacard/framework/APDU;BB)V
+					return;
+		}
+
+		.method private targetImpossible(Ljavacard/framework/APDU;)V {
+			.stack 4;
+			.locals 0;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_0;
+					aload_1;
+					bspush 48;
+					sconst_1;
+					invokespecial 14;		// symdemo/symdemo.sendResult(Ljavacard/framework/APDU;BB)V
+					return;
+		}
+
+		.method private sendResult(Ljavacard/framework/APDU;BB)V {
+			.stack 3;
+			.locals 1;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_1;
+					invokevirtual 5;		// getBuffer()[B
+					astore 4;
+				L1:	aload 4;
+					sconst_0;
+					sload_2;
+					bastore;
+					aload 4;
+					sconst_1;
+					sload_3;
+					bastore;
+					aload_1;
+					sconst_0;
+					sconst_2;
+					invokevirtual 16;		// setOutgoingAndSend(SS)V
+					return;
+		}
+
+	}
+
+}

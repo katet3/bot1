@@ -26,10 +26,51 @@
 | `ExceptionHandlerInfo` | start, active length, handler offset, catch index, stop bit | Перевод координат выполняет adapter JCVM |
 
 Компонент имеет tag и u2 size; размер относится к info-части. `BinaryReader`
-читает big-endian u1/u2/u4 и хранит курсор. Единого строгого bounds-check во всех
-его операциях пока нет: `read_bytes` использует slice и может вернуть укороченные
-данные. Поэтому проверки конкретных компонентов и downstream validation важны,
-но не заменяют будущую общую валидацию бинарных границ.
+читает big-endian u1/u2/u4 и хранит курсор. После D-08 перед каждым чтением
+проверяется полный диапазон: укороченные bytes не возвращаются, курсор при ошибке
+не изменяется. Это проверка физического буфера; ограничения declared size,
+counts, flags и связей между компонентами остаются обязанностью их parsers/verifier.
+
+## Строгое чтение и диагностика D-08
+
+`require_range(data, offset, length, context=...)` проверяет диапазон
+`[offset, offset + length)` до чтения, выделения таблицы или изменения курсора.
+Offset и length должны быть целыми `int`; `bool`, float, отрицательные значения
+и выход за буфер отвергаются. Нулевая длина допустима, в том числе на EOF.
+`seek` допускает обе границы буфера и явную перемотку; `skip` принимает только
+неотрицательную длину. Для перемещения назад следует использовать `seek`.
+
+`BinaryParseError(ValueError)` содержит `context`, `offset`, `needed`, `available`.
+Последние два поля заполнены для усечённого диапазона; у остальных ошибок могут
+быть `None`. `offset` относится к переданному буферу: у компонентного reader это
+обычно весь component с tag/size, у decoder — bytecode тело метода. При усечении
+switch-таблицы это начало таблицы, а `context` содержит mnemonic. Это не CAP key.
+Существующие обработчики `ValueError` продолжают работать. Часть проверок формата
+в компонентах по-прежнему возвращает обычный `ValueError`; новая иерархия не
+объявляется универсальной для всех ошибок проекта.
+
+Атомарность относится к одной операции reader. Parser мог успешно прочитать count
+перед ошибкой payload; автоматического отката всего parser нет. Аналогично
+`parse_bytecode` не возвращает частичный список после ошибки.
+
+Все формы операндов в таблице декодера разбираются явно. Неизвестный opcode или
+неописанный формат дают `BinaryParseError`; сырые байты не выдаются за готовые
+числовые operands. Для `iipush` сохраняется signed int, для static field indices —
+один unsigned u2, для increments — unsigned index и signed constant.
+
+| Инструкция | Уточнённый бинарный контракт |
+| --- | --- |
+| `slookupswitch`, `ilookupswitch` | `npairs:u2`; полный payload проверяется до цикла, keys строго возрастают |
+| `stableswitch`, `itableswitch` | Полный header и `high-low+1` offsets проверяются до цикла; `high < low` запрещено |
+| `sinc_w`, `iinc_w` | `index:u1`, `constant:s2`; длина инструкции 4 байта |
+| `dup_x`, `swap_x` | Один байт `mn`; длина инструкции 2 байта |
+
+Форматы сверены с [Oracle JCVM 3.0.5, §7.5](https://docs.oracle.com/cd/E59935_01/JCVMS.pdf).
+Нормализация branch targets остаётся относительной к opcode внутри метода.
+Проверки допустимости целей и стека выполняются CFG/IR; декодирование само по себе
+не включает lowering или runtime support. Для wide increments и `dup_x/swap_x`
+lowering по-прежнему явно отсутствует. Сырые payload полей вроде Descriptor types
+сохраняются намеренно для последующей стадии; это не удалённый operand fallback.
 
 ## Последовательность разбора
 
@@ -122,7 +163,7 @@ Class и Descriptor по нему, а не по порядку в списках
 | Python-модуль | Основные определения | Ответственность |
 | --- | --- | --- |
 | `components/base.py` | `CAPComponent` | Общие tag/size для dataclass-компонентов |
-| `components/binary_reader.py` | `BinaryReader` | Курсор и big-endian primitives; bounds-контракт требует усиления |
+| `components/binary_reader.py` | `BinaryReader`, `BinaryParseError`, `require_range` | Полные диапазоны чтения, стабильный курсор при отказе, структурированная диагностика |
 | `components/header.py` | `CAPVersion`, `PackageInfo`, `HeaderComponent` | Magic, CAP version, flags, package AID/version/name; проверяет tag/size и основные границы |
 | `components/directory.py` | `StaticFieldSizeInfo`, `CustomComponentInfo`, `DirectoryComponent` | Version-aware таблица размеров, counts и custom component descriptors |
 | `components/applet.py` | `AppletInfo`, `AppletComponent` | AID каждого applet и offset его install |
@@ -159,7 +200,7 @@ header: длина заголовка не участвует в обратно�
 При ошибке позднего метода linker не заменяет прежний полный список частичным.
 Повторная успешная линковка заменяет список, не добавляет дубликаты.
 
-Это локальные проверки linker, а не строгий контракт всех операций BinaryReader.
+Это дополнительные проверки linker поверх строгих операций BinaryReader D-08.
 Последовательный порядок Descriptor сохраняется: поиск методов через seek по
 descriptor offset, gaps, проверка всех handler slices и лишних байтов здесь
 не добавлены. Flags структурно сохраняются; полноценный verifier заголовков
@@ -170,12 +211,10 @@ descriptor offset, gaps, проверка всех handler slices и лишни�
 его начала как `descriptor.method_offset + 2`. Корректное чтение extended header
 не включает его преобразование или исполнение; этот отказ покрыт тестом.
 
-Таблица OPCODES шире семантического поднабора. Raw fallback некоторых operands
-не эквивалентен нормализованным аргументам `lower()`; например, для новых immediate
-и increment-форм нужно проверять signedness и число operands отдельно.
-Switch-парсеры имеют собственные чтения и требуют негативных boundary-тестов.
-В общем случае исключение может быть `ValueError`, `IndexError`, `struct.error`
-или ошибка linker; единая иерархия binary parse errors ещё не введена.
+Таблица OPCODES шире семантического поднабора. Исправление формата operand не
+реализует его stack/runtime semantics: unsupported операции по-прежнему отклоняет
+typed IR. D-08 устраняет короткие чтения и raw fallback; полная проверка всех
+структур CAP, версий и межкомпонентных ограничений остаётся отдельной задачей.
 
 ## Как изменять
 
@@ -195,7 +234,12 @@ extended header доходит до ожидаемого отказа typed adap
 ordered handlers, join по offset, отклонение несогласованных входов, два реальных
 CAP и путь `to_model()` → Soot на бинарном Method component с handler.
 Отдельная проверка подтверждает, что импорт parser не загружает IR/runtime.
-Оба набора вместе содержат 32 теста и не зависят от angr, pysoot или Graphviz:
+Регрессии D-08: [test_binary_reader.py](../../cap_decompile/tests/test_binary_reader.py)
+(12 тестов) и [test_bytecode_decoding.py](../../cap_decompile/tests/test_bytecode_decoding.py)
+(20 тестов). Проверяются полные/усечённые чтения, каждый обрезанный префикс десяти
+реальных компонентов, все fixed opcode layouts, переменные таблицы и четыре
+бинарные switch-формы до Soot. Вместе наборы содержат 64 теста и не зависят
+от angr, pysoot или Graphviz:
 
 ```powershell
 .\.venv-angr10\Scripts\python.exe -m unittest discover -s cap_decompile/tests -p "test_*.py" -v

@@ -10,14 +10,16 @@
 Soot IR, а часть проходит настоящий CAP от parser до angr. Эти уровни дополняют
 друг друга и не являются взаимозаменяемыми доказательствами.
 
-## Регрессии D-01–D-07
+## Регрессии D-01–D-08
 
-После исправлений ранних стадий проходит 103 теста без внешних зависимостей:
+После исправлений ранних стадий проходит 135 тестов без внешних зависимостей:
 
 | Набор | Количество | Что проверяет |
 | --- | --- | --- |
 | `cap_decompile/tests/test_method_headers.py` | 16 | Размеры 2/4 байта, смешанные headers, blob offsets и handler prefix, усечение и неверные counts, повторная линковка, отсутствие частичного результата, явный отказ typed adapter для extended и бинарный Method component до Soot |
 | `cap_decompile/tests/test_model_conversion.py` | 16 | Публичный `to_model`, static/instance signatures и header limits, ordered handlers, join по offset, строгие отказы общего adapter, отсутствие мутаций, реальные CAP и преобразование до Soot |
+| `cap_decompile/tests/test_binary_reader.py` | 12 | Полные чтения, нулевые/неверные диапазоны, сохранение курсора, seek/skip, усечённые payload и каждый неполный префикс десяти компонентов реального CAP |
+| `cap_decompile/tests/test_bytecode_decoding.py` | 20 | Все fixed opcode layouts, signed/unsigned operands, отсутствие raw fallback, widths и truncation switch-таблиц, согласованность четырёх бинарных switch-форм с CFG/IR/Soot |
 | `verification_engine/tests` | 35 | Диагностики правил, плоский отчёт, отсутствующие концы рёбер |
 | `cfg_generator/tests/test_exception_handlers.py` | 14 | Handler и legacy Mapping, границы инструкций/блоков, half-open диапазоны, порядок и отсутствие частичных изменений при ошибке |
 | `cfg_generator/tests/test_handler_pipeline.py` | 3 | Согласованность CFG с JCVM, порядок Soot traps, catch types/stop_bit, method-local координаты после CAP metadata adapter |
@@ -31,7 +33,7 @@ Soot IR, а часть проходит настоящий CAP от parser до 
 .\.venv-angr10\Scripts\python.exe -m unittest discover -s verification_engine/tests -p "test_*.py" -v
 ```
 
-Наборы сообщают соответственно `Ran 32 tests`, `Ran 36 tests`, `Ran 35 tests`,
+Наборы сообщают соответственно `Ran 64 tests`, `Ran 36 tests`, `Ran 35 tests`,
 все — `OK`.
 Сквозные тесты D-04 используют синтетические структуры CAP-компонентов и байткод,
 не запускают angr и не подтверждают исполнение catch. Дополнительный smoke-прогон
@@ -53,12 +55,18 @@ adapter на двух разных CAP: 7 методов `examples/name1/name1.c
 Проверка signature обнаруживает неверный тип return; malformed metadata приводят
 к явным ошибкам общего adapter. `cap_decompile` импортируется без загрузки IR/runtime.
 
+Тесты D-08 перебирают каждый усечённый префикс десяти настоящих CAP-компонентов,
+неполные fixed instructions и switch headers/tables. Проверяются unsigned counts,
+большие заявленные таблицы до выделения списка, знаки operands и точный offset
+следующей инструкции. Четыре switch-формы и int operands проходят из байтов через
+CFG/IR до Soot; wide increments и `dup_x/swap_x` остаются явно unsupported в lowering.
+
 Отдельный запуск `pysoot_adapter.tests.test_adapter.CAPIntegrationTests` на базе
 `e6d944f4f335070b8603880f66c9697a2a3e49bf` и с D-06 одинаково останавливается в
 `setUpClass`: `Missing explicit interface signature: a0000000620102@1.5:c10:t1:m5`.
 Вызов `build_jcvm_ir` в этом setup не передаёт `interface_signatures`; выполнено
 0 тестов класса. Эта существующая проблема тестовой настройки не включена в
-103 успешных регрессий D-01–D-07 и не исправляется этими изменениями.
+135 успешных регрессий D-01–D-08 и не исправляется этими изменениями.
 Кроме того, текущий `example.cap` совпадает по SHA-256 с `examples/name1/name1.cap`
 и содержит 7 методов; историческое ожидание 9 методов в этом классе устарело.
 
@@ -74,7 +82,7 @@ adapter на двух разных CAP: 7 методов `examples/name1/name1.c
 | `angr_integration/tests/test_javacard.py` | 20 | Install/APDU sequence, DES, symbolic P1, transactions/transient state, API identity и ограничения |
 
 Таблица относится к исходному комплекту разработки; это не текущий счётчик
-пройденных тестов D-07. В Git-ревизии `e6d944f4f335070b8603880f66c9697a2a3e49bf`
+пройденных тестов D-08. В Git-ревизии `e6d944f4f335070b8603880f66c9697a2a3e49bf`
 файл `integration_tests/test_name1.py` отсутствует, поэтому приведённая ниже
 историческая команда требует этого файла из соответствующего комплекта.
 Исторический успешный журнал — `JAVACARD_TEST_RESULTS.txt`; он относится

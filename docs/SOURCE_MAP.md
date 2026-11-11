@@ -13,13 +13,15 @@
 Регрессии находятся в `cfg_generator/tests/__init__.py` (маркер пакета),
 `test_exception_handlers.py` (14 проверок границ и графа) и `test_handler_pipeline.py`
 (3 проверки контрактов IR). Число 107 и `source_snapshot.json` относятся к исходному
-снимку, а не к текущему дереву после исправлений D-01–D-07.
+снимку, а не к текущему дереву после исправлений D-01–D-08.
 Дополнение D-05: обновлены classifier, leaders и edge builder; добавлен
 `cfg_generator/tests/test_control_flow.py` — 19 регрессий control flow и согласования IR.
 Дополнение D-06: исправлены размеры method headers и фиксация blob offset в linker;
 добавлены `cap_decompile/tests/__init__.py` и `test_method_headers.py` — 16 регрессий.
 Дополнение D-07: `CAPFile.to_model()` делегирует canonical typed adapter;
 добавлен `cap_decompile/tests/test_model_conversion.py` — 16 регрессий публичного API.
+Дополнение D-08: строгие BinaryReader ranges и явные operand layouts decoder;
+добавлены `test_binary_reader.py` (12 тестов) и `test_bytecode_decoding.py` (20 тестов).
 
 ## main.py
 
@@ -59,11 +61,12 @@ Applet AID и offset install; регистрация объектов здесь
 
 ### `cap_decompile/components/binary_reader.py`
 
-Big-endian чтение и курсор; bounds-контракт пока неоднороден.
+Big-endian чтение полного диапазона; неуспешная операция сохраняет курсор.
+Общий bounds guard используется также статическими bytecode readers.
 
 [Исходник](../cap_decompile/components/binary_reader.py) · [Руководство](modules/cap_decompile.md)
 
-Определения: `BinaryReader` — `read_u1()`, `read_u2()`, `read_u4()`, `read_bytes()`, `remaining()`, `tell()`, `seek()`, `skip()`.
+Определения: `BinaryParseError`; `require_range()`; `BinaryReader` — `read_u1()`, `read_u2()`, `read_u4()`, `read_bytes()`, `remaining()`, `tell()`, `seek()`, `skip()`.
 
 ### `cap_decompile/components/class_component.py`
 
@@ -151,6 +154,24 @@ limits, static flag, идентичность методов, method-local order
 
 Определения: `make_cap()`; `ModelConversionTests`.
 
+### `cap_decompile/tests/test_binary_reader.py`
+
+12 тестов полных чтений, диапазонов, стабильности курсора, seek/skip и ошибок
+усечённых компонентов, включая каждый неполный префикс десяти реальных payload.
+
+[Исходник](../cap_decompile/tests/test_binary_reader.py) · [Руководство](modules/cap_decompile.md)
+
+Определения: `BinaryReaderTests`; `ComponentReadBoundaryTests`.
+
+### `cap_decompile/tests/test_bytecode_decoding.py`
+
+20 тестов operand layouts, signedness, переменных switch headers/tables и
+согласованности бинарного decoder с CFG, JCVM, JVM-like и Soot.
+
+[Исходник](../cap_decompile/tests/test_bytecode_decoding.py) · [Руководство](modules/cap_decompile.md)
+
+Определения: `switch_bytes()`; `method()`; `FixedOperandTests`; `SwitchDecodingTests`.
+
 ### `cap_decompile/components/reference_location.py`
 
 Бинарные сведения о расположениях ссылок CAP.
@@ -210,11 +231,12 @@ limits, static flag, идентичность методов, method-local order
 
 ### `cap_decompile/model/method_info.py`
 
-Instruction/Method и opcode decoder; branch operands становятся method-local targets.
+Instruction/legacy Method и opcode decoder с явными operand layouts без raw fallback.
+Branch operands становятся method-local targets; switch ranges проверяются до обхода.
 
 [Исходник](../cap_decompile/model/method_info.py) · [Руководство](modules/cap_decompile.md)
 
-Определения: `Instruction`; `ExceptionHandler`; `Method`; `read_u1()`; `read_s1()`; `read_u2()`; `read_s2()`; `read_u4()`; `read_s4()`; `parse_stableswitch()`; `parse_itableswitch()`; `parse_slookupswitch()`; `parse_ilookupswitch()`; `parse_bytecode()`.
+Определения: `Instruction`; `ExceptionHandler`; `Method`; `read_u1()`; `read_s1()`; `read_u2()`; `read_s2()`; `read_u4()`; `read_s4()`; `_switch_header()`; `_parse_tableswitch()`; `_parse_lookupswitch()`; `parse_stableswitch()`; `parse_itableswitch()`; `parse_slookupswitch()`; `parse_ilookupswitch()`; `parse_bytecode()`.
 
 ### `cap_decompile/model/references.py`
 

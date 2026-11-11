@@ -204,7 +204,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--no-pysoot", action="store_true", help="Завершить конвейер на Soot IR")
     parser.add_argument("--no-angr", action="store_true", help="Завершить конвейер до загрузчика angr")
     parser.add_argument("--angr-entry", help="Устойчивый CAP-ключ метода входа (из pysoot_output/program.json)")
-    parser.add_argument('--javacard-profile', choices=('name1',), help='Явно включить ограниченные модели API для name1; без исполнения')
+    parser.add_argument('--javacard-profile', choices=('name1', 'symdemo'), help='Явно включить ограниченный профиль Java Card API; без исполнения')
     args = parser.parse_args(argv)
     if args.angr_entry and (args.no_angr or args.no_pysoot):
         parser.error("--angr-entry нельзя использовать вместе с --no-angr или --no-pysoot")

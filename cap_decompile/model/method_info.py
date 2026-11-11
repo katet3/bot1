@@ -3,6 +3,8 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Union
 
+from cap_decompile.components.binary_reader import BinaryParseError, require_range
+
 
 # =========================================================
 # DATA STRUCTURES
@@ -59,15 +61,17 @@ class Method:
 # =========================================================
 
 def read_u1(b: bytes, off: int) -> int:
+    require_range(b, off, 1, context="read_u1")
     return b[off]
 
 
 def read_s1(b: bytes, off: int) -> int:
-    val = b[off]
+    val = read_u1(b, off)
     return val - 0x100 if val & 0x80 else val
 
 
 def read_u2(b: bytes, off: int) -> int:
+    require_range(b, off, 2, context="read_u2")
     return (b[off] << 8) | b[off + 1]
 
 
@@ -77,6 +81,7 @@ def read_s2(b: bytes, off: int) -> int:
 
 
 def read_u4(b: bytes, off: int) -> int:
+    require_range(b, off, 4, context="read_u4")
     return (
         (b[off] << 24)
         | (b[off + 1] << 16)
@@ -94,191 +99,77 @@ def read_s4(b: bytes, off: int) -> int:
 # SWITCH PARSERS
 # =========================================================
 
-def parse_stableswitch(
-    bytecode: bytes,
-    offset: int,
-) -> tuple[Instruction, int]:
+def _switch_header(bytecode, offset, mnemonic, opcode, size):
+    require_range(bytecode, offset, size, context=mnemonic)
+    if bytecode[offset] != opcode:
+        raise BinaryParseError(f"Expected opcode 0x{opcode:02X}",
+                               offset=offset, context=mnemonic)
 
-    start = offset
-    pos = offset + 1
 
-    # JavaCard:
-    # no padding
-    # all offsets are s2
-
-    default_rel = read_s2(bytecode, pos)
-    pos += 2
-
-    low = read_s2(bytecode, pos)
-    pos += 2
-
-    high = read_s2(bytecode, pos)
-    pos += 2
-
+def _parse_tableswitch(bytecode, offset, *, integer):
+    mnemonic = "itableswitch" if integer else "stableswitch"
+    opcode, width = (0x74, 4) if integer else (0x73, 2)
+    header_size = 3 + 2 * width
+    _switch_header(bytecode, offset, mnemonic, opcode, header_size)
+    read_bound = read_s4 if integer else read_s2
+    default = offset + read_s2(bytecode, offset + 1)
+    low = read_bound(bytecode, offset + 3)
+    high = read_bound(bytecode, offset + 3 + width)
     if high < low:
-        raise ValueError(
-            f"Invalid stableswitch at {start}: "
-            f"high < low ({high} < {low})"
-        )
-
-    jump_count = high - low + 1
-
-    expected_end = pos + jump_count * 2
-
-    if expected_end > len(bytecode):
-        raise ValueError(
-            f"Invalid stableswitch at {start}: "
-            f"table exceeds bytecode size"
-        )
-
-    jumps = []
-
-    for _ in range(jump_count):
-
-        rel = read_s2(bytecode, pos)
-        pos += 2
-
-        jumps.append(start + rel)
-
-    instr = Instruction(
-        offset=start,
-        opcode=bytecode[start],
-        mnemonic="stableswitch",
-        operands={
-            "low": low,
-            "high": high,
-            "default": start + default_rel,
-            "jumps": jumps,
-        }
-    )
-
-    return instr, pos
+        raise BinaryParseError(f"high < low ({high} < {low})",
+                               offset=offset, context=mnemonic)
+    count = high - low + 1
+    table_offset = offset + header_size
+    # Validate the entire table before allocating or iterating its declared count.
+    require_range(bytecode, table_offset, count * 2, context=f"{mnemonic} jump table")
+    jumps = [offset + read_s2(bytecode, table_offset + 2 * index) for index in range(count)]
+    return Instruction(offset, opcode, mnemonic, {
+        "low": low, "high": high, "default": default, "jumps": jumps,
+    }), table_offset + 2 * count
 
 
-def parse_itableswitch(
-    bytecode: bytes,
-    offset: int,
-) -> tuple[Instruction, int]:
+def parse_stableswitch(bytecode: bytes, offset: int) -> tuple[Instruction, int]:
+    """default:s2, low:s2, high:s2, followed by high-low+1 signed s2 offsets."""
+    return _parse_tableswitch(bytecode, offset, integer=False)
 
-    start = offset
-    pos = offset + 1
 
-    # JavaCard:
-    # default = s2
-    # low/high = s4
-    # jump offsets = s2
+def parse_itableswitch(bytecode: bytes, offset: int) -> tuple[Instruction, int]:
+    """default:s2, low:s4, high:s4, followed by high-low+1 signed s2 offsets."""
+    return _parse_tableswitch(bytecode, offset, integer=True)
 
-    default_rel = read_s2(bytecode, pos)
-    pos += 2
 
-    low = read_s4(bytecode, pos)
-    pos += 4
-
-    high = read_s4(bytecode, pos)
-    pos += 4
-
-    if high < low:
-        raise ValueError(
-            f"Invalid itableswitch at {start}: "
-            f"high < low ({high} < {low})"
-        )
-
-    jump_count = high - low + 1
-
-    expected_end = pos + jump_count * 2
-
-    if expected_end > len(bytecode):
-        raise ValueError(
-            f"Invalid itableswitch at {start}: "
-            f"table exceeds bytecode size"
-        )
-
-    jumps = []
-
-    for _ in range(jump_count):
-
-        rel = read_s2(bytecode, pos)
-        pos += 2
-
-        jumps.append(start + rel)
-
-    instr = Instruction(
-        offset=start,
-        opcode=bytecode[start],
-        mnemonic="itableswitch",
-        operands={
-            "low": low,
-            "high": high,
-            "default": start + default_rel,
-            "jumps": jumps,
-        }
-    )
-
-    return instr, pos
+def _parse_lookupswitch(bytecode, offset, *, integer):
+    mnemonic = "ilookupswitch" if integer else "slookupswitch"
+    opcode, match_width = (0x76, 4) if integer else (0x75, 2)
+    _switch_header(bytecode, offset, mnemonic, opcode, 5)
+    default = offset + read_s2(bytecode, offset + 1)
+    count = read_u2(bytecode, offset + 3)
+    pair_size = match_width + 2
+    table_offset = offset + 5
+    require_range(bytecode, table_offset, count * pair_size, context=f"{mnemonic} pair table")
+    read_match = read_s4 if integer else read_s2
+    pairs = []
+    for index in range(count):
+        position = table_offset + index * pair_size
+        match = read_match(bytecode, position)
+        target = offset + read_s2(bytecode, position + match_width)
+        if pairs and match <= pairs[-1][0]:
+            raise BinaryParseError("Switch keys must be strictly increasing",
+                                   offset=position, context=mnemonic)
+        pairs.append((match, target))
+    return Instruction(offset, opcode, mnemonic, {
+        "default": default, "npairs": count, "pairs": pairs,
+    }), table_offset + count * pair_size
 
 
 def parse_slookupswitch(bytecode: bytes, offset: int) -> tuple[Instruction, int]:
-    """JavaCard slookupswitch: default=s2, npairs=u1, pairs=(match:s2, offset:s2)"""
-    start = offset
-    pos = offset + 1
-    # print(f"DEBUG slookupswitch at {offset}: {bytecode[pos:pos+30].hex()}")
-    default_rel = read_s2(bytecode, pos)
-    pos += 2
-
-    npairs = read_s2(bytecode, pos)
-    pos += 2
-
-    pairs = []
-    for _ in range(npairs):
-        match = read_s2(bytecode, pos)
-        pos += 2
-        offset_rel = read_s2(bytecode, pos)
-        pos += 2
-        pairs.append((match, start + offset_rel))
-
-    instr = Instruction(
-        offset=start,
-        opcode=bytecode[start],
-        mnemonic="slookupswitch",
-        operands={
-            "default": start + default_rel,
-            "npairs": npairs,
-            "pairs": pairs,
-        }
-    )
-    return instr, pos
+    """default:s2, npairs:u2, followed by (match:s2, offset:s2) pairs."""
+    return _parse_lookupswitch(bytecode, offset, integer=False)
 
 
 def parse_ilookupswitch(bytecode: bytes, offset: int) -> tuple[Instruction, int]:
-    """JavaCard ilookupswitch: default=s2, npairs=u1, pairs=(match:s4, offset:s2)"""
-    start = offset
-    pos = offset + 1
-
-    default_rel = read_s2(bytecode, pos)
-    pos += 2
-
-    npairs = read_u1(bytecode, pos)
-    pos += 1
-
-    pairs = []
-    for _ in range(npairs):
-        match = read_s4(bytecode, pos)
-        pos += 4
-        offset_rel = read_s2(bytecode, pos)
-        pos += 2
-        pairs.append((match, start + offset_rel))
-
-    instr = Instruction(
-        offset=start,
-        opcode=bytecode[start],
-        mnemonic="ilookupswitch",
-        operands={
-            "default": start + default_rel,
-            "npairs": npairs,
-            "pairs": pairs,
-        }
-    )
-    return instr, pos
+    """default:s2, npairs:u2, followed by (match:s4, offset:s2) pairs."""
+    return _parse_lookupswitch(bytecode, offset, integer=True)
 
 
 # =========================================================
@@ -295,7 +186,13 @@ SIGNED_2 = {
     "sipush",
 }
 
+SIGNED_4 = {"iipush"}
+
 UNSIGNED_1 = {
+    "iload",
+    "istore",
+    "dup_x",
+    "swap_x",
     "newarray",
     "sload",
     "sstore",
@@ -321,6 +218,14 @@ UNSIGNED_1 = {
 }
 
 UNSIGNED_2 = {
+    "getstatic_a",
+    "getstatic_b",
+    "getstatic_s",
+    "getstatic_i",
+    "putstatic_a",
+    "putstatic_b",
+    "putstatic_s",
+    "putstatic_i",
     "getfield_a_w",
     "getfield_b_w",
     "getfield_s_w",
@@ -343,11 +248,12 @@ UNSIGNED_2 = {
 # format:
 # opcode: (mnemonic, operand_size)
 #
-# operand_size:
+# operand_size counts encoded bytes, not the number of decoded operands:
 #   0  -> no operands
-#   1  -> 1-byte operand
-#   2  -> 2-byte operand
-#   4  -> 4-byte operand
+#   1  -> 1-byte operand area
+#   2  -> 2-byte operand area
+#   3  -> 3-byte operand area
+#   4  -> 4-byte operand area
 #  -1  -> variable length
 # =========================================================
 
@@ -454,8 +360,8 @@ OPCODES = {
     0x3C: ("pop2", 0),
     0x3D: ("dup", 0),
     0x3E: ("dup2", 0),
-    0x3F: ("dup_x", 0),
-    0x40: ("swap_x", 0),
+    0x3F: ("dup_x", 1),
+    0x40: ("swap_x", 1),
 
     # -----------------------------------------------------
     # arithmetic
@@ -621,8 +527,8 @@ OPCODES = {
     # wide increments
     # -----------------------------------------------------
 
-    0x96: ("sinc_w", 4),
-    0x97: ("iinc_w", 4),
+    0x96: ("sinc_w", 3),
+    0x97: ("iinc_w", 3),
 
     # -----------------------------------------------------
     # wide branches
@@ -690,176 +596,53 @@ OPCODES = {
 # =========================================================
 
 def parse_bytecode(bytecodes: bytes) -> List[Instruction]:
-
+    """Decode complete instructions with explicit operand formats; no raw fallback."""
+    switches = {0x73: parse_stableswitch, 0x74: parse_itableswitch,
+                0x75: parse_slookupswitch, 0x76: parse_ilookupswitch}
     instructions = []
-
     offset = 0
-    length = len(bytecodes)
-
-    while offset < length:
-
+    while offset < len(bytecodes):
         opcode = bytecodes[offset]
-
         if opcode not in OPCODES:
-            raise ValueError(
-                f"Unknown opcode 0x{opcode:02X} "
-                f"at offset {offset}"
-            )
-
+            raise BinaryParseError(f"Unknown opcode 0x{opcode:02X}",
+                                   offset=offset, context="bytecode")
         mnemonic, operand_size = OPCODES[opcode]
-
-        if opcode == 0x73:
-            instr, new_offset = parse_stableswitch(
-                bytecodes,
-                offset,
-            )
-
-            instructions.append(instr)
-            offset = new_offset
+        if opcode in switches:
+            instruction, offset = switches[opcode](bytecodes, offset)
+            instructions.append(instruction)
             continue
+        if operand_size < 0:
+            raise BinaryParseError("Unsupported operand format", offset=offset, context=mnemonic)
+        require_range(bytecodes, offset, 1 + operand_size, context=mnemonic)
 
-        if opcode == 0x74:
-            instr, new_offset = parse_itableswitch(
-                bytecodes,
-                offset,
-            )
-
-            instructions.append(instr)
-            offset = new_offset
-            continue
-        
-        if opcode == 0x75:   # slookupswitch
-            instr, new_offset = parse_slookupswitch(bytecodes, offset)
-            instructions.append(instr)
-            offset = new_offset
-            continue
-
-        if opcode == 0x76:   # ilookupswitch
-            instr, new_offset = parse_ilookupswitch(bytecodes, offset)
-            instructions.append(instr)
-            offset = new_offset
-            continue
-
-        if offset + 1 + operand_size > length:
-            raise ValueError(f"Truncated {mnemonic} at offset {offset}")
-
-        operands = []
-
-        # =================================================
-        # signed 16-bit branches
-        # =================================================
-
-        # -------------------------------------------------
-        # JavaCard 1-byte branches
-        # -------------------------------------------------
-        if opcode in range(0x60, 0x70 + 1):   # 0x60..0x70 включительно (goto тоже)
-            rel = read_s1(bytecodes, offset + 1)
-            target = offset + rel
-            operands = [target]
-            operand_size = 1
-        # -------------------------------------------------
-        # jsr (2-byte branch)
-        # -------------------------------------------------
-        elif opcode == 0x71:
-            rel = read_s2(bytecodes, offset + 1)
-            target = offset + rel
-            operands = [target]
-            operand_size = 2
-        # -------------------------------------------------
-        # wide branches (_w) – 2-byte offsets
-        # -------------------------------------------------
-        elif opcode in range(0x98, 0xA8 + 1):
-            rel = read_s2(bytecodes, offset + 1)
-            target = offset + rel
-            operands = [target]
-            operand_size = 2
-        # -------------------------------------------------
-        # ret
-        # -------------------------------------------------
-        elif opcode == 0x72:
-            operands = [read_u1(bytecodes, offset + 1)]
-            operand_size = 1
-
-        # =================================================
-        # signed immediate
-        # =================================================
-
+        if 0x60 <= opcode <= 0x70:
+            operands = [offset + read_s1(bytecodes, offset + 1)]
+        elif opcode == 0x71 or 0x98 <= opcode <= 0xA8:
+            operands = [offset + read_s2(bytecodes, offset + 1)]
         elif mnemonic in SIGNED_1:
-
-            operands = [
-                read_s1(bytecodes, offset + 1)
-            ]
-
+            operands = [read_s1(bytecodes, offset + 1)]
         elif mnemonic in SIGNED_2:
-
-            operands = [
-                read_s2(bytecodes, offset + 1)
-            ]
-
-        # =================================================
-        # unsigned immediate
-        # =================================================
-
+            operands = [read_s2(bytecodes, offset + 1)]
+        elif mnemonic in SIGNED_4:
+            operands = [read_s4(bytecodes, offset + 1)]
         elif mnemonic in UNSIGNED_1:
-
-            operands = [
-                read_u1(bytecodes, offset + 1)
-            ]
-
+            operands = [read_u1(bytecodes, offset + 1)]
         elif mnemonic in UNSIGNED_2:
-
-            operands = [
-                read_u2(bytecodes, offset + 1)
-            ]
-
-        # =================================================
-        # sinc
-        # =================================================
-
+            operands = [read_u2(bytecodes, offset + 1)]
         elif mnemonic in ("checkcast", "instanceof"):
             operands = [read_u1(bytecodes, offset + 1), read_u2(bytecodes, offset + 2)]
-
         elif mnemonic == "invokeinterface":
             operands = [read_u1(bytecodes, offset + 1), read_u2(bytecodes, offset + 2),
                         read_u1(bytecodes, offset + 4)]
-
-        elif mnemonic == "sinc":
-
-            index = read_u1(bytecodes, offset + 1)
-            const = read_s1(bytecodes, offset + 2)
-
-            operands = [index, const]
-
-        # =================================================
-        # no operands
-        # =================================================
-
+        elif mnemonic in ("sinc", "iinc"):
+            operands = [read_u1(bytecodes, offset + 1), read_s1(bytecodes, offset + 2)]
+        elif mnemonic in ("sinc_w", "iinc_w"):
+            operands = [read_u1(bytecodes, offset + 1), read_s2(bytecodes, offset + 2)]
         elif operand_size == 0:
-
             operands = []
-
-        # =================================================
-        # raw fallback
-        # =================================================
-
         else:
+            raise BinaryParseError("Unsupported operand format", offset=offset, context=mnemonic)
 
-            operands = list(
-                bytecodes[
-                    offset + 1:
-                    offset + 1 + operand_size
-                ]
-            )
-
-        instructions.append(
-            Instruction(
-                offset=offset,
-                opcode=opcode,
-                mnemonic=mnemonic,
-                operands=operands,
-            )
-        )
-
+        instructions.append(Instruction(offset, opcode, mnemonic, operands))
         offset += 1 + operand_size
-
     return instructions

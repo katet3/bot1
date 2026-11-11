@@ -1,0 +1,51 @@
+{
+  "package_aid": "f053594d44454d4f",
+  "package_version": [
+    1,
+    0
+  ],
+  "imports": [
+    {
+      "aid": "a0000000620101",
+      "version": [
+        1,
+        6
+      ]
+    },
+    {
+      "aid": "a0000000620001",
+      "version": [
+        1,
+        0
+      ]
+    }
+  ],
+  "class_names": {
+    "f053594d44454d4f@1.0:o2": "symdemo.symdemo",
+    "a0000000620101@1.6:c3": "javacard.framework.Applet",
+    "a0000000620101@1.6:c10": "javacard.framework.APDU",
+    "a0000000620101@1.6:c7": "javacard.framework.ISOException"
+  },
+  "method_names": {
+    "f053594d44454d4f@1.0:internal:t6:o1": "<init>",
+    "f053594d44454d4f@1.0:internal:t6:o8": "install",
+    "f053594d44454d4f@1.0:internal:t6:o30": "process",
+    "f053594d44454d4f@1.0:internal:t6:o137": "receiveExact",
+    "f053594d44454d4f@1.0:internal:t6:o182": "runRare",
+    "f053594d44454d4f@1.0:internal:t6:o430": "runOverflow",
+    "f053594d44454d4f@1.0:internal:t6:o522": "runImpossible",
+    "f053594d44454d4f@1.0:internal:t6:o597": "targetRare",
+    "f053594d44454d4f@1.0:internal:t6:o608": "targetOverflow",
+    "f053594d44454d4f@1.0:internal:t6:o619": "targetImpossible",
+    "f053594d44454d4f@1.0:internal:t6:o630": "sendResult",
+    "a0000000620101@1.6:c3:t6:m0": "<init>",
+    "a0000000620101@1.6:c3:t3:m2": "register",
+    "a0000000620101@1.6:c3:t3:m3": "selectingApplet",
+    "a0000000620101@1.6:c10:t3:m1": "getBuffer",
+    "a0000000620101@1.6:c10:t3:m6": "setIncomingAndReceive",
+    "a0000000620101@1.6:c10:t3:m8": "setOutgoingAndSend",
+    "a0000000620101@1.6:c7:t6:m1": "throwIt"
+  },
+  "field_names": {},
+  "interface_signatures": {}
+}

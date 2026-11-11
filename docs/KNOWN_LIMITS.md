@@ -4,8 +4,8 @@
 
 Документ отделяет намеренные границы модели от незавершённых или ошибочных ветвей
 реализации. Перечень получен при чтении исходников и воспроизведении дефектов.
-Статус обновлён 30 октября 2026 года: D-01–D-07 исправлены. Проходят
-32 теста CAP linker/conversion, 35 тестов верификатора и 36 тестов CFG/IR — всего 103.
+Статус обновлён 30 октября 2026 года: D-01–D-08 исправлены. Проходят
+64 теста CAP parsing/linker/conversion, 35 тестов верификатора и 36 тестов CFG/IR — всего 135.
 Остальные проблемы сохраняются.
 
 ## Подтверждённые проблемы ранних стадий
@@ -19,7 +19,7 @@
 | D-05 | CFG classifier не включал conditional `_w` и `athrow` | Потеря ветвлений, неверные блоки и обычное продолжение после throw | **Исправлено:** все 32 decoded conditionals, отдельный throw terminator без normal successor, leaders после всех terminators, явный отказ для `jsr/ret`. 19 тестов в `cfg_generator/tests/test_control_flow.py` |
 | D-06 | Linker вычитал `...` для extended header; два поля читал как `u2` вместо `u1` | TypeError, поглощение начала тела и неверные offsets следующих методов | **Исправлено:** offset сохраняется до чтения; обычный/extended header занимает 2/4 байта. Проверяются доступность header/body и bytecode_count; результат публикуется после полного успеха. 16 регрессий. Typed adapter по-прежнему явно отклоняет extended methods |
 | D-07 | `CAPFile.to_model()` заменял token/header/handlers на `None`, не передавал signature/static flag | Результат не подходил для typed IR; собранная таблица handlers терялась | **Исправлено:** фасад общего `methods_from_cap`, возвращающий `list[MethodInput]`; 16 регрессий metadata, координат, отказов и пути до Soot. Изменение типа результата и offset описано в руководстве CAP parser |
-| D-08 | `BinaryReader.read_bytes` не требует полного диапазона; часть parsers использует raw fallback | Неполное единообразие boundary diagnostics и семантики operands | Strict reads, structured parse errors, malformed-input regressions |
+| D-08 | Короткие `read_bytes` продвигали курсор за буфер; decoder использовал raw fallback и неверные размеры части инструкций | Усечённые данные могли приниматься, operands и offsets расходились с IR | **Исправлено:** общий bounds guard и `BinaryParseError`, полный диапазон до изменения курсора, явные форматы operands, u2 counts lookup-switch и корректные длины wide increments/stack mn. 32 новые регрессии; полная семантическая верификация CAP не заявляется |
 | D-09 | Container не требует Applet, builder читает его безусловно | Library CAP без Applet завершается ошибкой | Определить contract library/app CAP, сделать requirement согласованным |
 | D-10 | Components индексируются по короткому имени после чтения всего ZIP | Multi-package collisions, отсутствует общий лимит объёма контейнера | Reject duplicates/выбор пакета, ограничения ресурсов по задаче |
 | D-11 | Standalone `jvm_like_ir` CLI не принимает interface signatures | Не подходит для name1 с invokeinterface | Добавить symbols option либо явно сохранить ограниченный CLI |
@@ -85,12 +85,20 @@ runtime dispatch исключений или разбор нового бина�
 Legacy `Method`/`ExceptionHandler` не удалены, но больше не являются результатом
 этого API. Extended methods по-прежнему явно отклоняются typed adapter.
 
-В рамках D-08 отдельно подтверждено расхождение `ilookupswitch`: decoder читает
-npairs как один байт, а `jcvm_ir.lowering` считает двухбайтовое поле в длине
-инструкции. На входе с одной парой decoder ставит следующую инструкцию на offset 11,
-IR ожидает 12 (`Noncontiguous instruction at 11; expected 12`). D-05 проверяет
-CFG для четырёх switch-форм по декодированным Instruction, не исправляет их
-бинарный формат и не объявляет этот путь сквозным.
+До D-08 `BinaryReader(b'abc').read_bytes(5)` возвращал три байта и ставил курсор
+на 5. Некоторые усечённые компоненты проходили проверку размера по такому курсору.
+Теперь полный диапазон проверяется до операции; отказ не меняет её исходный offset.
+Неверные длины и offsets, включая bool/float, отвергаются; `skip` допускает только
+движение вперёд, для перемотки используется `seek`.
+
+Ранее `ilookupswitch` читал однобайтовый npairs, а IR учитывал два байта;
+`slookupswitch` ошибочно трактовал count как signed short. Теперь оба используют
+u2, проверяют весь payload до цикла и отвергают неупорядоченные/повторяющиеся keys.
+У `sinc_w/iinc_w` исправлена длина 5 → 4 байта, у `dup_x/swap_x` — 1 → 2.
+Signed int immediate, increments и static field indices разбираются явно;
+raw operand fallback удалён. Все четыре switch-формы проверяются из байтов до Soot.
+32 новые и 103 прежние регрессии проходят. Wide increments и stack mn всё ещё
+не имеют lowering; правильный decoder не означает поддержку их исполнения.
 
 Эти наблюдения ограничивают доверие к invalid-input diagnostics. Они не отменяют
 исторический результат 93 тестов на покрытых сценариях, но показывают, почему одного их числа
@@ -149,8 +157,8 @@ files описывают свою версию; источник текущег�
 
 ## Приоритеты сопровождения
 
-После D-01–D-07 следующий пункт списка — D-08: проверки binary boundaries,
-strict reads и согласование ширины npairs в `ilookupswitch`.
+После D-01–D-08 следующий пункт списка — D-09: согласованный контракт Applet/library CAP.
+Строгие чтения не заменяют валидацию всех declared sizes, flags и связей компонентов.
 Также нужна полноценная CAP-фикстура с непустой таблицей обработчиков.
 Синтетический бинарный Method component уже проверяется до Soot в D-06,
 но не заменяет такой архив. Новый execution feature можно добавлять
