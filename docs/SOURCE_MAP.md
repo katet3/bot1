@@ -13,7 +13,7 @@
 Регрессии находятся в `cfg_generator/tests/__init__.py` (маркер пакета),
 `test_exception_handlers.py` (14 проверок границ и графа) и `test_handler_pipeline.py`
 (3 проверки контрактов IR). Число 107 и `source_snapshot.json` относятся к исходному
-снимку, а не к текущему дереву после исправлений D-01–D-08.
+снимку, а не к текущему дереву после исправлений D-01–D-10.
 Дополнение D-05: обновлены classifier, leaders и edge builder; добавлен
 `cfg_generator/tests/test_control_flow.py` — 19 регрессий control flow и согласования IR.
 Дополнение D-06: исправлены размеры method headers и фиксация blob offset в linker;
@@ -22,6 +22,14 @@
 добавлен `cap_decompile/tests/test_model_conversion.py` — 16 регрессий публичного API.
 Дополнение D-08: строгие BinaryReader ranges и явные operand layouts decoder;
 добавлены `test_binary_reader.py` (12 тестов) и `test_bytecode_decoding.py` (20 тестов).
+Дополнение D-09: optional getter контейнера, `CAPFile.applet=None` и пустые applets
+в CAP metadata. Добавлены `cap_decompile/tests/library_fixture.py` (бинарный ZIP
+CAP 2.1/2.2), `cap_decompile/tests/test_optional_applet.py` (10 структурных тестов)
+и `angr_integration/tests/test_library_cap.py` (4 теста загрузки/исполнения).
+Дополнение D-10: `ZipLimits`, индекс полных имён ZIP и выбор единственного каталога
+до чтения payload; ниже обновлены оба модуля container. Добавлен
+`cap_decompile/tests/test_zip_container.py` — 25 регрессий неоднозначных ZIP,
+лимитов, выборочного чтения, повторной загрузки и диагностики CLI.
 
 ## main.py
 
@@ -190,19 +198,25 @@ limits, static flag, идентичность методов, method-local order
 
 ### `cap_decompile/container/cap_container.py`
 
-Отбор /javacard/*.cap, обязательные компоненты и доступ по короткому имени.
+Выбор единственного каталога `javacard` с прямыми дочерними `.cap`, обязательный
+набор и доступ по короткому имени после проверки полных ZIP-путей. `load()`
+публикует полный результат только при успехе; `component_directory` сохраняет
+происхождение. Optional getter отличает отсутствие записи от пустых bytes.
 
 [Исходник](../cap_decompile/container/cap_container.py) · [Руководство](modules/cap_decompile.md)
 
-Определения: `CAPContainer` — `load()`, `get_component()`, `list_components()`, `print_component()`, `print_components()`.
+Определения: `CAPContainer` — `load()`, `get_component()`, `get_optional_component()`, `list_components()`, `print_component()`, `print_components()`.
 
 ### `cap_decompile/container/zip_reader.py`
 
-Чтение ZIP без интерпретации бинарного формата.
+Проверка полных имён, дубликатов, методов сжатия и размеров ZIP до открытия payload.
+Выборочное ограниченное чтение из того же открытого архива; без интерпретации
+бинарных CAP-компонентов и без извлечения файлов на диск.
 
 [Исходник](../cap_decompile/container/zip_reader.py) · [Руководство](modules/cap_decompile.md)
 
-Определения: `ZipReader` — `list_files()`, `read_file()`, `read_all()`.
+Определения: `ZipLimits` — неизменяемая политика размеров; `ZipReader` —
+`list_files()`, `read_selected()`, `read_file()`, `read_all()`.
 
 ### `cap_decompile/main.py`
 
@@ -216,6 +230,7 @@ limits, static flag, идентичность методов, method-local order
 
 Сборка CAPFile, ограниченная validate/link; `to_model` — ленивый фасад общего
 `jcvm_ir.methods_from_cap`, возвращающий `list[MethodInput]`.
+Applet необязателен; validate сверяет его наличие с Header/Directory.
 
 [Исходник](../cap_decompile/model/cap_file.py) · [Руководство](modules/cap_decompile.md)
 

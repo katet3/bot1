@@ -10,9 +10,9 @@
 Soot IR, а часть проходит настоящий CAP от parser до angr. Эти уровни дополняют
 друг друга и не являются взаимозаменяемыми доказательствами.
 
-## Регрессии D-01–D-08
+## Регрессии D-01–D-10
 
-После исправлений ранних стадий проходит 135 тестов без внешних зависимостей:
+После исправлений ранних стадий проходит 170 тестов без внешних зависимостей:
 
 | Набор | Количество | Что проверяет |
 | --- | --- | --- |
@@ -20,6 +20,8 @@ Soot IR, а часть проходит настоящий CAP от parser до 
 | `cap_decompile/tests/test_model_conversion.py` | 16 | Публичный `to_model`, static/instance signatures и header limits, ordered handlers, join по offset, строгие отказы общего adapter, отсутствие мутаций, реальные CAP и преобразование до Soot |
 | `cap_decompile/tests/test_binary_reader.py` | 12 | Полные чтения, нулевые/неверные диапазоны, сохранение курсора, seek/skip, усечённые payload и каждый неполный префикс десяти компонентов реального CAP |
 | `cap_decompile/tests/test_bytecode_decoding.py` | 20 | Все fixed opcode layouts, signed/unsigned operands, отсутствие raw fallback, widths и truncation switch-таблиц, согласованность четырёх бинарных switch-форм с CFG/IR/Soot |
+| `cap_decompile/tests/test_optional_applet.py` | 10 | Отсутствие Applet, CAP 2.1/2.2 library ZIP до Soot/metadata, сохранение настоящих апплетов, согласованность Header/Directory и строгий разбор присутствующего компонента |
+| `cap_decompile/tests/test_zip_container.py` | 25 | Дубликаты, несколько каталогов компонентов, пути, размеры, сжатие, выборочное чтение до payload, повторная загрузка и CLI |
 | `verification_engine/tests` | 35 | Диагностики правил, плоский отчёт, отсутствующие концы рёбер |
 | `cfg_generator/tests/test_exception_handlers.py` | 14 | Handler и legacy Mapping, границы инструкций/блоков, half-open диапазоны, порядок и отсутствие частичных изменений при ошибке |
 | `cfg_generator/tests/test_handler_pipeline.py` | 3 | Согласованность CFG с JCVM, порядок Soot traps, catch types/stop_bit, method-local координаты после CAP metadata adapter |
@@ -33,7 +35,7 @@ Soot IR, а часть проходит настоящий CAP от parser до 
 .\.venv-angr10\Scripts\python.exe -m unittest discover -s verification_engine/tests -p "test_*.py" -v
 ```
 
-Наборы сообщают соответственно `Ran 64 tests`, `Ran 36 tests`, `Ran 35 tests`,
+Наборы сообщают соответственно `Ran 99 tests`, `Ran 36 tests`, `Ran 35 tests`,
 все — `OK`.
 Сквозные тесты D-04 используют синтетические структуры CAP-компонентов и байткод,
 не запускают angr и не подтверждают исполнение catch. Дополнительный smoke-прогон
@@ -60,6 +62,45 @@ adapter на двух разных CAP: 7 методов `examples/name1/name1.c
 большие заявленные таблицы до выделения списка, знаки operands и точный offset
 следующей инструкции. Четыре switch-формы и int operands проходят из байтов через
 CFG/IR до Soot; wide increments и `dup_x/swap_x` остаются явно unsupported в lowering.
+
+D-09 дополнительно проверяется четырьмя тестами
+`angr_integration/tests/test_library_cap.py`: binary library CAP → pysoot → angr,
+отсутствие выдуманного install, явный выбор метода, символьный short-аргумент,
+отказ JavaCardSession для библиотеки и запуск общего CLI. Фикстура в
+`cap_decompile/tests/library_fixture.py` строит ZIP из бинарных компонентов
+независимо от builder: CAP 2.1/2.2, один класс и два экспортируемых static-метода.
+Это синтетический CAP, а не результат Converter с физической карты.
+
+```powershell
+.\.venv-angr10\Scripts\python.exe -m unittest cap_decompile.tests.test_optional_applet angr_integration.tests.test_library_cap -v
+```
+
+Команда выполняет 14 новых тестов; runtime-части нужны зависимости проекта,
+включая профиль name1 для проверки отказа applet-сеанса. При выпуске D-09 также
+выполнены `pysoot_adapter.tests.test_adapter.AdapterTests` (14) и
+`angr_integration.tests.test_javacard` (20). Вместе с 145 ранними регрессиями и
+4 новыми runtime-тестами это 183 успешные проверки выбранных наборов,
+а не утверждение о прохождении всех исторических тестов проекта.
+
+D-10 добавляет 25 тестов контейнера. Проверки запрещают открытие payload при
+ошибке индекса, а не только проверяют итоговое исключение. Два неполных пакета
+не могут дополнять друг друга, повторный Header не перезаписывает первый.
+Отдельно проверяются границы всех четырёх лимитов, учёт невыбранных записей,
+чтение нескольких payload из одного архива и сохранение старого результата
+после отказа повторной загрузки. Повреждение CRC читаемого компонента приводит
+к ошибке; невыбранный вспомогательный payload не читается. Есть проверки
+библиотечного ZIP и настоящих CAP из примеров, а также subprocess-запуск CLI:
+при дубликате — exit code 1, понятная диагностика, без traceback и новых outputs.
+
+```powershell
+.\.venv-angr10\Scripts\python.exe -m unittest cap_decompile.tests.test_zip_container -v
+```
+
+Ожидается `Ran 25 tests`, `OK`. В выпуске D-10 также повторены все наборы из
+начала раздела (170), `pysoot_adapter.tests.test_adapter.AdapterTests` (14),
+`angr_integration.tests.test_javacard` (20) и `angr_integration.tests.test_library_cap`
+(4): **208 успешных тестов**. Проверка выполнена на Linux, Python 3.12.14,
+angr 10.0.4.post1; Windows и физическая смарт-карта в этот прогон не входили.
 
 Отдельный запуск `pysoot_adapter.tests.test_adapter.CAPIntegrationTests` на базе
 `e6d944f4f335070b8603880f66c9697a2a3e49bf` и с D-06 одинаково останавливается в

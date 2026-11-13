@@ -2,9 +2,11 @@
 
 from pathlib import Path
 from typing import Dict
-from .zip_reader import ZipReader
+from .zip_reader import ZipLimits, ZipReader
 
 
+# Applet.cap is optional for library packages. Header/Directory consistency
+# belongs to CAPFile.validate(), after these binary components are parsed.
 REQUIRED_COMPONENTS = {
     "Header.cap",
     "Directory.cap",
@@ -19,28 +21,49 @@ REQUIRED_COMPONENTS = {
 
 
 class CAPContainer:
-    def __init__(self, path: Path):
-        self.path = path
-        self.reader = ZipReader(path)
+    def __init__(self, path: Path, *, limits: ZipLimits | None = None):
+        self.path = Path(path)
+        self.reader = ZipReader(self.path, limits=limits)
         self.components: Dict[str, bytes] = {}
+        self.component_directory: str | None = None
 
     def load(self) -> None:
-        all_files = self.reader.read_all()
+        selected = self.reader.read_selected(self._select_components)
+        components = {name.rsplit('/', 1)[1]: data for name, data in selected.items()}
+        directory = next(iter(selected)).rsplit('/', 1)[0]
+        # Publish only a complete successful read. A reload replaces the previous
+        # package; failure preserves its last successful snapshot unchanged.
+        self.components = components
+        self.component_directory = directory
 
-        for full_path, data in all_files.items():
-            if "/javacard/" in full_path and full_path.endswith(".cap"):
-                short_name = full_path.split("/")[-1]
-                self.components[short_name] = data
+    def _select_components(self, names: tuple[str, ...]) -> list[str]:
+        packages: dict[str, list[str]] = {}
+        for name in names:
+            parts = name.split('/')
+            if not name.endswith('.cap') or 'javacard' not in parts[:-1]:
+                continue
+            if parts[-2] != 'javacard':
+                raise ValueError(f'CAP component must be directly inside javacard/: {name!r}')
+            directory = '/'.join(parts[:-1])
+            packages.setdefault(directory, []).append(name)
+        if len(packages) > 1:
+            raise ValueError('Multiple CAP component directories are unsupported: ' +
+                             ', '.join(sorted(packages)))
+        selected = next(iter(packages.values()), [])
+        self._validate({name.rsplit('/', 1)[1] for name in selected})
+        return selected
 
-        self._validate()
-
-    def _validate(self) -> None:
-        missing = REQUIRED_COMPONENTS - set(self.components.keys())
+    def _validate(self, names=None) -> None:
+        missing = REQUIRED_COMPONENTS - set(self.components if names is None else names)
         if missing:
-            raise ValueError(f"Missing CAP components: {missing}")
+            raise ValueError('Missing CAP components: ' + ', '.join(sorted(missing)))
 
     def get_component(self, name: str) -> bytes:
         return self.components[name]
+
+    def get_optional_component(self, name: str) -> bytes | None:
+        """Return None only for an absent entry; present empty data stays bytes."""
+        return self.components.get(name)
 
     def list_components(self) -> list[str]:
         return list(self.components.keys())
@@ -48,7 +71,7 @@ class CAPContainer:
     def print_component(self, name: str, bytes_per_line: int = 16) -> None:
         data = self.get_component(name)
 
-        print(f"{self.path.stem}/javacard/{name} :")
+        print(f"{self.component_directory}/{name} :")
 
         # Вывод hex-байтов
         for i in range(0, len(data), bytes_per_line):

@@ -99,7 +99,7 @@ class LoadedProgram:
                 "State preparation rejects unsupported reachable methods; errors are never skipped.",
                 "Execution readiness checks operations; state-dependent heap guards still apply at runtime.",
                 "A prepared instance receiver/base_state is supplied explicitly; install is not run implicitly.",
-                "The optional name1 profile uses bounded Python API models and concrete DES; it does not execute native firmware.",
+                "Optional Java Card profiles use bounded Python API models; native firmware is not executed.",
             ],
         }
 
@@ -147,11 +147,14 @@ class AngrLoader:
                     entry_key = only_key
         if entry_key is not None:
             index.entry(entry_key)
-        if api_profile not in (None, 'name1'):
+        if api_profile not in (None, 'name1', 'symdemo'):
             raise LoaderError(f'Unknown Java Card API profile: {api_profile}')
         if api_profile == 'name1':
             from .javacard_api import Name1API
             api = Name1API()
+        elif api_profile == 'symdemo':
+            from .symdemo_api import SymDemoAPI
+            api = SymDemoAPI()
         else:
             api = None
         readiness = ExecutionReadiness(program, index, api)

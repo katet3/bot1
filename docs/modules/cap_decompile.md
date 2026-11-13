@@ -19,8 +19,10 @@
 
 | Объект | Что хранит | Что важно сохранять |
 | --- | --- | --- |
-| `CAPContainer.components` | short component name → bytes | Исходный бинарный payload без преобразования |
-| `CAPFile` | Header, Directory, Import, Applet, CP, Class, Method, StaticField, RefLocation, Descriptor | Связь между компонентами; историческое поле `import_componet` написано именно так |
+| `CAPContainer.components` | short component name → bytes | Исходный payload единственного проверенного каталога; новый словарь публикуется только после полного успешного чтения |
+| `CAPContainer.component_directory` | Полный путь каталога внутри ZIP | `None` до первой успешной загрузки; например, `pkg/javacard` или `javacard` |
+| `ZipLimits` | Ограничения физического ZIP и размеров записей | Неизменяемая политика анализатора; все значения — положительные `int` |
+| `CAPFile` | Header, Directory, Import, необязательный Applet, CP, Class, Method, StaticField, RefLocation, Descriptor | `applet=None` для library CAP; историческое поле `import_componet` написано именно так |
 | `MethodInfo` | Header, bytecodes, handler slice, offset | Начало header относительно methods blob, без handler_count и таблицы handlers; не равно публичному CAP key |
 | `Instruction` | `offset`, `opcode`, `mnemonic`, `operands` | Offset от начала bytecode тела; branch targets уже абсолютные внутри метода |
 | `ExceptionHandlerInfo` | start, active length, handler offset, catch index, stop bit | Перевод координат выполняет adapter JCVM |
@@ -74,11 +76,14 @@ lowering по-прежнему явно отсутствует. Сырые paylo
 
 ## Последовательность разбора
 
-1. `ZipReader` читает архив в память. `CAPContainer` выбирает пути с `/javacard/`
-   и суффиксом `.cap`, проверяет обязательный набор.
+1. `ZipReader` проверяет физический размер и каталог ZIP без распаковки записей.
+   `CAPContainer` требует один каталог с прямыми дочерними `.cap`-файлами внутри
+   `javacard/` и полный обязательный набор. После этих проверок `ZipReader`
+   читает только выбранные компоненты с ограничением размера.
 2. Header определяет CAP version, package AID/version и optional package name.
 3. Остальные `parse_from_bytes` получают эту версию и разбирают свой компонент.
-4. `CAPFile.validate()` сейчас сверяет только размер Header с Directory.
+4. `CAPFile.validate()` сверяет размер Header с Directory и контракт наличия Applet:
+   ACC_APPLET, component_sizes[2] и applet_count.
 5. `CAPFile.link()` вызывает `MethodComponent.link_with_descriptor`.
 6. Linker последовательно читает headers и тела по bytecode_count из Descriptor.
    До header сохраняется курсор; перед чтением проверяются доступность header/body
@@ -86,10 +91,116 @@ lowering по-прежнему явно отсутствует. Сырые paylo
    только после чтения всех методов. `methods_from_cap` затем сопоставляет
    offset/сигнатуры и проверяет согласованность.
 
-Container индексирует компоненты по короткому имени. Несколько пакетов с одинаковыми
-именами компонентов могут перезаписать друг друга: multi-package ZIP не является
-поддержанным контрактом. `Applet.cap` не включён в `REQUIRED_COMPONENTS`, но builder
-читает его безусловно; отсутствие приводит к ошибке, а не к поддержке library CAP.
+## Однозначный ZIP и ограниченное чтение: контракт D-10
+
+Сначала строится индекс `полный путь → ZipInfo`. Повторное полное имя — ошибка,
+даже если payload одинаков. Все имена должны быть относительными POSIX-путями:
+запрещены начальный `/`, обратная косая черта, пустые сегменты, `.` и `..`,
+NUL и двоеточие в первом сегменте. Не допускается изменение имени самим `ZipInfo`
+при его чтении. Имена чувствительны к регистру; нормализация для устранения
+неоднозначности не выполняется. Записи каталогов с завершающим `/` допустимы.
+Файлы из архива на файловую систему не извлекаются.
+
+Компоненты — прямые дочерние файлы с суффиксом `.cap` в `javacard/` или
+`<prefix>/javacard/`. Вложенный `pkg/javacard/nested/Header.cap` отклоняется.
+Файл `notes/Header.cap` вне `javacard/` считается вспомогательным. Если компоненты
+найдены в двух каталогах, загрузка отклоняется с перечислением каталогов:
+пакет не выбирается автоматически, неполные наборы не объединяются.
+Проверка обязательных компонентов также выполняется до открытия payload.
+
+Только после проверки единственного каталога компоненты получают короткие ключи
+в `CAPContainer.components`. Поэтому `get_component('Header.cap')` остаётся
+совместимым с builder без потери происхождения и без перезаписи другого пакета.
+Контракт допускает один пакет, а не обязательно один апплет: содержимое Applet
+разбирается следующей стадией.
+
+`ZipReader.read_selected(selector)` передаёт selector неизменяемый tuple полных
+имён. Возвращённые имена проверяются целиком до чтения: отсутствующее имя даёт
+`KeyError`, повтор в выборе — `ValueError`. Индекс и payload читаются из одного
+открытого архива. `list_files()` читает только каталог; `read_file()` и совместимый
+`read_all()` используют ту же политику проверки. Container больше не вызывает
+`read_all()`; вспомогательные payload не распаковываются и их CRC не проверяется.
+
+### Политика размера
+
+| Поле `ZipLimits` | По умолчанию | Что ограничивает |
+| --- | --- | --- |
+| `max_archive_bytes` | 16 MiB | Физический размер открытого ZIP до создания `ZipFile` |
+| `max_members` | 1024 | Число всех записей, включая записи каталогов |
+| `max_member_bytes` | 2 MiB | Заявленный распакованный размер каждой записи |
+| `max_total_bytes` | 16 MiB | Сумму заявленных распакованных размеров всех записей |
+
+MiB означает `1024 * 1024` байт. Ограничения применяются ко всему архиву, в том
+числе к невыбранным записям. Допустимы только `ZIP_STORED` и `ZIP_DEFLATED`;
+зашифрованные записи и другие методы сжатия отклоняются при проверке каталога.
+Это ограничения среды анализа, а не требования спецификации Java Card.
+
+Для задачи с более крупным допустимым входом политика задаётся через Python API:
+
+```python
+from pathlib import Path
+from cap_decompile.container.cap_container import CAPContainer
+from cap_decompile.container.zip_reader import ZipLimits
+
+container = CAPContainer(Path('application.cap'), limits=ZipLimits(
+    max_archive_bytes=32 * 1024 * 1024,
+    max_total_bytes=32 * 1024 * 1024,
+))
+container.load()
+```
+
+Неуказанные поля сохраняют значения по умолчанию. Ноль не отключает проверку:
+каждое поле требует положительный `int`, включая запрет `bool`. Новых CLI-флагов
+для этих параметров нет; обычный `main.py` использует политику по умолчанию.
+
+Payload читается по `ZipInfo` порциями не более 64 KiB. Reader проверяет длину
+полученного потока против заявленной и допустимой, не возвращает частичные bytes.
+CRC и повреждения читаемых записей проверяет `zipfile`; ошибки формата ZIP,
+CRC и распаковки преобразуются в `ValueError`. Существующий CLI выводит ошибку
+конвейера и завершается с кодом 1.
+
+Физический размер проверяется на том же открытом файле через `fstat`. Стандартный
+`ZipFile` затем разбирает central directory в памяти; лимит числа записей проверяется
+после этого разбора. Поэтому лимиты не являются жёсткой квотой RAM/CPU или времени
+процесса. Все выбранные payload остаются bytes в памяти, но ограничены политикой
+входных данных. Это не потоковый parser компонентов и не полная CAP-верификация.
+
+### Повторная загрузка
+
+`CAPContainer.load()` сначала получает новый полный результат в локальных данных.
+При успехе он целиком заменяет `components` и `component_directory`: необязательный
+компонент из предыдущего архива не остаётся в новом. При отказе, в том числе
+на последнем читаемом компоненте, сохраняется предыдущий успешный снимок.
+Вызывающий код обязан обработать исключение; старый снимок не означает успешную
+загрузку нового файла.
+
+## Необязательный Applet component: контракт D-09
+
+`Applet.cap` не входит в обязательный набор: библиотечный пакет может содержать
+классы и методы без устанавливаемых апплетов. `get_component(name)` сохраняет
+строгий доступ и KeyError при отсутствии записи. Новый
+`get_optional_component(name)` возвращает `None` только при отсутствии; пустые
+bytes означают присутствующий повреждённый компонент и передаются parser-у.
+
+Builder хранит `CAPFile.applet: AppletComponent | None`, не создавая фиктивного
+компонента с нулевым count. Межкомпонентные проверки выполняются после разбора:
+
+| Applet.cap | Header ACC_APPLET (0x04) | Directory | Результат |
+| --- | --- | --- | --- |
+| Отсутствует | Снят | size=0, applet_count=0 | Library CAP, `applet=None` |
+| Присутствует и корректен | Установлен | Размер и count совпадают с Applet | Applet CAP |
+| Отсутствует, но объявлен Header или Directory | Любой | Есть противоречие | ValueError с указанием отсутствующего Applet.cap |
+| Присутствует без флага или с несовпадающими size/count | Любой | Есть противоречие | ValueError |
+
+Проверки соответствуют Java Card VM Specification, разделам 6.4–6.6.
+Остальные обязательные компоненты остаются обязательными. Общая проверка всех
+flags и межкомпонентных связей этим изменением не заявляется.
+
+`metadata_from_cap` передаёт library CAP с `ProgramMetadata.applets=()`.
+Внешние пользователи `cap.applet.applets` должны сначала проверить `cap.applet is not None`.
+Методы библиотеки проходят обычный typed pipeline. Для исполнения задаётся
+поддержанный метод и его аргументы; установка через `JavaCardSession` требует
+ровно один настоящий апплет. Несколько методов не дают автоматическую entry point.
 
 ## Публичное преобразование и миграция D-07
 
@@ -146,8 +257,8 @@ Class и Descriptor по нему, а не по порядку в списках
 
 | Python-модуль | Основные определения | Назначение и контракт сопровождения |
 | --- | --- | --- |
-| `container/zip_reader.py` | `ZipReader` | `list_files`, `read_file`, `read_all`; ZIP I/O, без интерпретации компонентов |
-| `container/cap_container.py` | `CAPContainer` | Выбор компонентов, required-set, чтение по имени; debug hex-print не участвует в семантике |
+| `container/zip_reader.py` | `ZipLimits`, `ZipReader` | Проверка полного индекса и лимитов; `list_files`, `read_selected`, `read_file`, `read_all`; без интерпретации компонентов |
+| `container/cap_container.py` | `CAPContainer` | Единственный каталог компонентов, required-set, атомарная публикация результата и доступ по короткому имени; debug hex-print не участвует в семантике |
 | `model/cap_file.py` | `CAPFile`, `CAPFileBuilder` | Композиция parsers, validate/link; `to_model` делегирует typed adapter, lowering здесь не выполняется |
 | `model/method_info.py` | `Instruction`, `Method`, `ExceptionHandler`, `parse_bytecode`, switch parsers | Таблица opcode/длины, signed/unsigned operands, method-local targets; `Method`/`ExceptionHandler` — legacy containers |
 | `model/constant_pool_entries.py` | Нет | Пустая заготовка; рабочие CP-модели находятся в `components/constant_pool.py` |
